@@ -162,13 +162,13 @@ typedef enum		e_bool
 ** t_vec4 t : distance
 */
 
-typedef struct		s_ray
-{
-	t_vec4			origin;
-	t_vec4			dir;
-	double			t;
-	short			refl_depth;
-}					t_ray;
+// typedef struct		s_ray
+// {
+// 	t_vec4			origin;
+// 	t_vec4			dir;
+// 	double			t;
+// 	short			refl_depth;
+// }					t_ray;
 
 /*
 ** r : intensity rgb(1.0, 0.0, 0.0) == red
@@ -273,6 +273,7 @@ double				ft_vec4_mag(t_vec4 a);
 double				ft_vec4_dot_product(t_vec4 a, t_vec4 b);
 void				ft_draw_scene(t_data *data);
 void				*ft_ray_trace(void *param);
+t_vec3				ft_vec3_cross_product(t_vec3 vec1, t_vec3 vec2);
 t_vec4				ft_vec4_cross_product(t_vec4 vec1, t_vec4 vec2);
 t_vec4				ft_vec4_add(t_vec4 vec1, t_vec4 vec2);
 t_vec4				ft_vec4_scalar(t_vec4 a, double factor);

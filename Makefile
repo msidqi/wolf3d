@@ -3,14 +3,15 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: arezouk <arezouk@student.42.fr>            +#+  +:+       +#+         #
+#    By: msidqi <msidqi@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/11/23 00:08:25 by msidqi            #+#    #+#              #
 #    Updated: 2019/10/11 12:15:24 by msidqi           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME = wolf3d
+NAME2 = wolf3d
+NAME = callOfDuty_ModernWarfare
 LIBSDL = src/libSDL/libSDL2-2.0.0.dylib
 LIBSDL_ttf = src/libSDL_ttf/libSDL2_ttf-2.0.0.dylib
 LIBGL_PATH = src/libgl/
@@ -34,6 +35,7 @@ $(NAME) : $(WRAP_SRC) main.c $(LIBGLL)
 	$(CC) $^ -o $@ -I$(INCLUDE) $(LIBSDL) $(LIBSDL_ttf) $(LIBGLL)
 
 clean :
+	make fclean -C $(LIBGL_PATH)
 	rm -rf $(OBJ) 
 #$(LIBGLL)   gcc main.c src/sdlwrapper/*.c -o wolf -I include  libSDL/libSDL2-2.0.0.dylib
 fclean : clean

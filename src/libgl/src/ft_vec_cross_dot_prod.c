@@ -28,6 +28,16 @@ t_vec4	ft_vec4_cross_product(t_vec4 vec1, t_vec4 vec2)
 	return (ret);
 }
 
+// t_vec3	ft_vec3_cross_product(t_vec3 vec1, t_vec3 vec2)
+// {
+// 	t_vec3 ret;
+
+// 	ret.x = vec1.y * vec2.z - vec1.z * vec2.y;
+// 	ret.y = vec1.z * vec2.x - vec1.x * vec2.z;
+// 	ret.z = vec1.x * vec2.y - vec1.y * vec2.x;
+// 	return (ret);
+// }
+
 double	ft_vec2_dot_product(t_vec2 a, t_vec2 b)
 {
 	return (a.x * b.x + a.y * b.y);
