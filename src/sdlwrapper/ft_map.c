@@ -50,6 +50,33 @@ void ft_print_map(t_map *map, t_player *player)
 	}
 }
 
+void ft_draw_map(SDL_Surface *surface, t_map *map, t_player *player)
+{
+	int k, l;
+
+	l = -1;
+	while (++l <= map->width)
+	{
+		k = -1;
+		while (++k < map->height * 100)
+		{
+			put_pixel32(surface, l * 100, k, 0xFFFFFFFF);
+		}
+		// exit(1);
+	}
+	k = -1;
+	while (++k <= map->height)
+	{
+		l = -1;
+		while (++l < map->width * 100)
+		{
+			put_pixel32(surface, l, k * 100, 0xFFFFFFFF);
+		}
+	}
+	(void)player;
+	(void)surface;
+}
+
 void	ft_destroy_map(t_map *map)
 {
 	int i;

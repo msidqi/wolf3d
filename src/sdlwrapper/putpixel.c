@@ -47,6 +47,9 @@ void put_pixel32( SDL_Surface *surface, int x, int y, Uint32 pixel )
 {
     //Convert void ptr (the pixels) to 32 bit
     Uint32 *pixels = (Uint32 *)surface->pixels;
-    
-    pixels[ ( y * surface->w ) + x ] = pixel;
+    // printf("pixel. x: %d y: %d\n", x, y);
+    if (y < surface->h && x < surface->w && y >= 0 && x >= 0)
+        pixels[ ( y * surface->w ) + x ] = pixel;
+    else
+        printf("ERROR: attempted to draw out of surface. x: %d y: %d\n", x, y);
 }

@@ -34,6 +34,8 @@
 # define SCALING_MATRIX 2
 # define NEAR 1e-6
 # define FAR 1e+6
+# define MICRO 1e-6
+# define MEGA 1e+6
 # define DISTANT_LIGHT 1e+6
 # define RED 0xFF0000
 # define GREEN 0xFF00
@@ -91,6 +93,12 @@ typedef struct		s_vec2
 	double			x;
 	double			y;
 }					t_vec2;
+
+typedef struct		s_vec2int
+{
+	int				x;
+	int				y;
+}					t_vec2int;
 
 typedef struct		s_vec3
 {
@@ -161,14 +169,6 @@ typedef enum		e_bool
 ** t_vec4 dir : direction vector
 ** t_vec4 t : distance
 */
-
-// typedef struct		s_ray
-// {
-// 	t_vec4			origin;
-// 	t_vec4			dir;
-// 	double			t;
-// 	short			refl_depth;
-// }					t_ray;
 
 /*
 ** r : intensity rgb(1.0, 0.0, 0.0) == red
@@ -266,7 +266,8 @@ t_matrix4			ft_get_translation_matrix4(t_matrix4 mat, double x,
 		double y, double z);
 t_vec4				ft_create_vec4(double x, double y, double z, double w);
 t_vec4				ft_matrix_x_vector(t_matrix4 mat, t_vec4 vec);
-void				ft_printvec4(t_vec4 *vec);
+void				ft_putvec3(t_vec3 *vec);
+void				ft_putvec4(t_vec4 *vec);
 t_vec4				ft_vec4_sub(t_vec4 vec1, t_vec4 vec2);
 t_vec4				ft_vec4_normalize(t_vec4 a);
 double				ft_vec4_mag(t_vec4 a);
@@ -301,6 +302,8 @@ size_t				ft_strlen(const char *str);
 void				ft_putstr_fd(const char *s, int fd);
 void				ft_putchar_fd(char c, int fd);
 void				ft_putnbr_fd(int nb, int fd);
+void				ft_putnbr(int nb);
+
 double				ft_atof(char *nbr);
 
 int					ft_is_numeric(char *str);

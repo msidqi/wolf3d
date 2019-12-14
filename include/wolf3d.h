@@ -10,12 +10,14 @@
 #define WIN_HEIGHT 720
 #define WIN_WIDTH 1280
 #define BPP 32
-#define UP (t_vec3){0, 1, 0}
-#define DOWN (t_vec3){0, -1, 0}
+#define DOWN (t_vec3){0, 1, 0}
+#define UP (t_vec3){0, -1, 0}
 #define LEFT (t_vec3){-1, 0, 0}
 #define RIGHT (t_vec3){1, 0, 0}
 #define FORW (t_vec3){0, 0, -1}
 #define BACK (t_vec3){0, 0, 1}
+#define TILE_WIDTH 100
+#define TILE_HEIGHT 100
 
 typedef struct s_action
 {
@@ -28,9 +30,12 @@ typedef struct		s_ray
 	t_vec3			dir;
 	double			t;
 	double			angle;
+	t_vec3			first_inter_point;
+	t_vec3			increments;
+	t_vec3			secon_inter;
 }					t_ray;
 
-
+typedef t_vec2int t_index;
 typedef struct s_player
 {
 	t_vec3		pos;
@@ -77,5 +82,6 @@ int scan_code(SDL_Event	event);
 int scan_code_up(SDL_Event	event);
 int scan_code_down(SDL_Event	event);
 void ft_print_map(t_map *map, t_player *player);
+void ft_draw_map(SDL_Surface *surface, t_map *map, t_player *player);
 t_map	*ft_create_map(int width, int height);
 void	ft_destroy_map(t_map *map);

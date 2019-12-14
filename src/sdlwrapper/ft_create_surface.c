@@ -19,6 +19,7 @@ SDL_Surface *ft_create_surface(SDL_Window *win, int win_width, int win_height, i
     gmask = 0x0000ff00;
     bmask = 0x000000ff;
 #endif
+printf("w: %d | h %d\n", win_width, win_height);
 	bmp = SDL_CreateRGBSurface(0, win_width, win_height, bpp, rmask, gmask, bmask, amask);
 	if (bmp == NULL) {
 		fprintf(stderr, "SDL_CreateRGBSurface Error: %s\n", SDL_GetError());
