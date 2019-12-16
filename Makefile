@@ -3,17 +3,17 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: msidqi <msidqi@student.42.fr>              +#+  +:+       +#+         #
+#    By: aabouibr <aabouibr@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/11/23 00:08:25 by msidqi            #+#    #+#              #
-#    Updated: 2019/10/11 12:15:24 by msidqi           ###   ########.fr        #
+#    Updated: 2019/12/16 01:24:12 by aabouibr         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME2 = wolf3d
 NAME = callOfDuty_ModernWarfare
 LIBSDL = src/libSDL/libSDL2-2.0.0.dylib
-LIBSDL_ttf = src/libSDL_ttf/libSDL2_ttf-2.0.0.dylib
+#LIBSDL_ttf = src/libSDL_ttf/libSDL2_ttf-2.0.0.dylib
 LIBGL_PATH = src/libgl/
 LIBGLL = src/libgl/src/libgl.a
 SRC_PATH = src
