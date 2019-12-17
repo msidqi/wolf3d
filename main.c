@@ -126,7 +126,7 @@ t_player *ft_create_player()
 
 	player = (t_player *)malloc(sizeof(t_player));
 	player->pos = (t_vec3){ 350, 370, 0 };
-	player->forw = ft_vec3_normalize((t_vec3){ -1, 0, 0 });
+	player->forw = ft_vec3_normalize((t_vec3){ 1, 1, 0 });
 	player->right = ft_vec3_normalize(ft_vec3_cross_product(player->forw, (t_vec3){ 0, 0, -1}));
 	// printf("right: %f, %f, %f\n" , player->right.x, player->right.y, player->right.z);
 	player->focal_len = 1;
@@ -183,7 +183,7 @@ void	ft_find_vertical_intersection(t_ray *ray, t_player *player, t_vec3 mapped_p
 
 	ray->first_inter_point = ft_limit_inter_by_map((t_vec3){player->pos.x + distance_to_horizontal_edge, player->pos.y + distance_from_horizontal_edge_to_vertical_inter, 0}, map);
 	// if (ray->first_inter_point.x >= 100 && ray->first_inter_point.x < 110)
-		printf("vertical inter point: (%f, %f)\n", player->pos.x + distance_to_horizontal_edge, player->pos.y + distance_from_horizontal_edge_to_vertical_inter);
+// printf("vertical inter point: (%f, %f)\n", player->pos.x + distance_to_horizontal_edge, player->pos.y + distance_from_horizontal_edge_to_vertical_inter);
 	// printf("ERROR y: %f\n", player->pos.y + distance_from_horizontal_edge_to_vertical_inter);
 	//(t_vec3){player->pos.x + distance_to_horizontal_edge, player->pos.y + distance_from_horizontal_edge_to_vertical_inter, 0};
 	double next_horiz_edge_to_next_vertical_inter = TILE_WIDTH * tan(ray->angle); // steps
@@ -191,9 +191,10 @@ void	ft_find_vertical_intersection(t_ray *ray, t_player *player, t_vec3 mapped_p
 	ray->increments.x = dot > 0 ? TILE_WIDTH : -TILE_WIDTH;
 	ray->increments.y = dot > 0 ? next_horiz_edge_to_next_vertical_inter : -next_horiz_edge_to_next_vertical_inter;
 
-	ray->secon_inter = ft_limit_inter_by_map(ft_vec3_add(ray->first_inter_point, ray->increments), map);
-	// if (ray->secon_inter.y >= 100 && ray->secon_inter.y < 110)
-	printf("NEXT vertical inter point:       (%f, %f)\n", ray->secon_inter.x, ray->secon_inter.y);
+	ray->wall_inter = ft_limit_inter_by_map(ft_vec3_add(ray->first_inter_point, ray->increments), map);
+// printf("VERTICAL wall distance ------>:       (%f)\n", ft_vec3_mag(ft_vec3_sub(ray->wall_inter, player->pos)));//ft_vec3_mag_cmp());
+	// if (ray->wall_inter.y >= 100 && ray->wall_inter.y < 110)
+// printf("NEXT vertical inter point:       (%f, %f)\n", ray->wall_inter.x, ray->wall_inter.y);
 	(void)map;
 }
 
@@ -207,12 +208,12 @@ void	ft_find_horizontal_intersection(t_ray *ray, t_player *player, t_vec3 mapped
 
 	double vertical_edge;
 
-	if (ray->angle > (double)1.5708)
-		ray->angle = (double)3.14159 - ray->angle;
+	// if (ray->angle > (double)1.5708)
+	// 	ray->angle = (double)3.14159 - ray->angle;
 	t_vec3 cross = ft_vec3_cross_product(ray->dir, DOWN);
-	if (ft_vec3_dot_product(FORW, cross) < 0)
+	if (ft_vec3_dot_product(FORW, cross) > 0)
 		ray->angle = -ray->angle;
-	printf(" angle in deg: %f |  ft_vec3_dot_product(FORW, cross) %f \n", ray->angle * 180 / PI , ft_vec3_dot_product(FORW, cross));
+// printf(" angle in deg: %f |  ft_vec3_dot_product(FORW, cross) %f \n", ray->angle * 180 / PI , ft_vec3_dot_product(FORW, cross));
 	// printf("angle in rad: %f | angle in deg: %f \n", ray->angle, ray->angle * 180 / PI);
 	if ((dot < 0))
 		vertical_edge =  player->pos.y - ((int)player->pos.y % TILE_HEIGHT);		// top edge
@@ -229,14 +230,16 @@ void	ft_find_horizontal_intersection(t_ray *ray, t_player *player, t_vec3 mapped
 
 
 
-	ray->first_inter_point = (t_vec3){ player->pos.x + distance_from_vertical_edge_to_horizontal_inter, player->pos.y + distance_to_vertical_edge, 0 };
+	ray->first_inter_point = ft_limit_inter_by_map((t_vec3){ player->pos.x + distance_from_vertical_edge_to_horizontal_inter, player->pos.y + distance_to_vertical_edge, 0 }, map);
 	double next_edge_to_next_vertical_inter = 100 * tan(ray->angle); // steps
 
 	ray->increments.x = dot > 0 ? next_edge_to_next_vertical_inter : -next_edge_to_next_vertical_inter; ////// next inter point is weird af
 	ray->increments.y = dot > 0 ? TILE_HEIGHT : -TILE_HEIGHT;
 
-	ray->secon_inter = ft_vec3_add(ray->first_inter_point, ray->increments);
-// printf("NEXT horizontal edge inter point:       (%f, %f)\n", secon_inter.x, secon_inter.y);
+// printf("distance to first HORIZONTAL inter point:       (%f)\n", ft_vec3_mag(ft_vec3_sub(ray->first_inter_point, player->pos)));//ft_vec3_mag_cmp());
+	ray->wall_inter = ft_limit_inter_by_map(ft_vec3_add(ray->first_inter_point, ray->increments), map);
+// printf("HORIZONTAL wall distance ------>:       (%f)\n", ft_vec3_mag(ft_vec3_sub(ray->wall_inter, player->pos)));//ft_vec3_mag_cmp());
+// printf("NEXT horizontal edge inter point:       (%f, %f)\n", wall_inter.x, wall_inter.y);
 	(void)map;
 }
 
@@ -276,7 +279,7 @@ void ft_find_closest_wall(t_ray *ray, t_map *map)
 	m_index = get_map_index(i, map);
 	if (m_index.x < 0 || m_index.y < 0 || !get_map_tile(m_index, map))
 	{
-		printf("second inter out of array !! \n");
+		printf("wall_inter out of array !! \n");
 		exit(1);
 	}
 	printf("In map tiles, intersection is at --------------(%f, %f)-----------------------> Array [%d, %d]\n\n", i.x, i.y, m_index.x, m_index.y);
@@ -300,14 +303,13 @@ void	ft_ray_cast(t_player *player, t_map *map, SDL_Surface *surface)
 	int x;
 	t_vec3	mapped_pos;
 	t_ray ray;
-	(void)map;
 
 	x = -1;
 	while (++x < WIDTH)
 	{
 		mapped_pos = ft_map_pixels_to_world(x, player);
-		// ft_find_vertical_intersection(&ray, player, mapped_pos, map);
-		ft_find_horizontal_intersection(&ray, player, mapped_pos, map);
+		ft_find_vertical_intersection(&ray, player, mapped_pos, map);
+		// ft_find_horizontal_intersection(&ray, player, mapped_pos, map);
 		//FIRST
 		if (ray.first_inter_point.x > 0 && ray.first_inter_point.y > 0 && ray.first_inter_point.x <= map->width * TILE_WIDTH && ray.first_inter_point.y <= map->height * TILE_HEIGHT)
 		{
@@ -318,28 +320,20 @@ void	ft_ray_cast(t_player *player, t_map *map, SDL_Surface *surface)
 			put_pixel32(surface, ray.first_inter_point.x, ray.first_inter_point.y - 1, 0xFFFFFF00);
 		}
 		//SECOND
-// t_vec3 secon_inter = ft_limit_inter_by_map(ft_vec3_add(ray.first_inter_point, ray.increments), map);
-		// ft_putnbrr((int)ft_vec3_add(ray.first_inter_point, ray.increments).y);
-		// write(2, "HERE!\n", 6);
-				// printf("before %f %f | after %f %f\n", ft_vec3_add(ray.first_inter_point, ray.increments).x, ft_vec3_add(ray.first_inter_point, ray.increments).y, secon_inter.x, secon_inter.y);
-		if (ray.secon_inter.x > 0 && ray.secon_inter.y > 0 && ray.secon_inter.x <= map->width * TILE_WIDTH && ray.secon_inter.y <= map->height * TILE_HEIGHT)
+		if (ray.wall_inter.x > 0 && ray.wall_inter.y > 0 && ray.wall_inter.x <= map->width * TILE_WIDTH && ray.wall_inter.y <= map->height * TILE_HEIGHT)
 		{
-			put_pixel32(surface, ray.secon_inter.x, ray.secon_inter.y, 0xFFFFFF00);
-			put_pixel32(surface, ray.secon_inter.x + 1, ray.secon_inter.y, 0xFFFFFF00);
-			put_pixel32(surface, ray.secon_inter.x, ray.secon_inter.y + 1, 0xFFFFFF00);
-			put_pixel32(surface, ray.secon_inter.x - 1, ray.secon_inter.y, 0xFFFFFF00);
-			put_pixel32(surface, ray.secon_inter.x, ray.secon_inter.y - 1, 0xFFFFFF00);
+			put_pixel32(surface, ray.wall_inter.x, ray.wall_inter.y, 0xFFFFFF00);
+			put_pixel32(surface, ray.wall_inter.x + 1, ray.wall_inter.y, 0xFFFFFF00);
+			put_pixel32(surface, ray.wall_inter.x, ray.wall_inter.y + 1, 0xFFFFFF00);
+			put_pixel32(surface, ray.wall_inter.x - 1, ray.wall_inter.y, 0xFFFFFF00);
+			put_pixel32(surface, ray.wall_inter.x, ray.wall_inter.y - 1, 0xFFFFFF00);
 		}
 		put_pixel32(surface, player->pos.x, player->pos.y, 0xFF00FFFF);
 		// break ;
 		// ft_draw_intersection_point();
-		// ft_find_closest_wall(&ray, map);
-		// float angle
-		// printf("%f, %f, %f\n", mapped_pos.x, mapped_pos.y, mapped_pos.z);
+			// ft_find_closest_wall(&ray, map);
 	}
-		// printf("-------------------------\n");
 	// exit(1);
-	// ft_send_ray(&ray, player);
 }
 
 int	main()

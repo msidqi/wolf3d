@@ -32,7 +32,7 @@ typedef struct		s_ray
 	double			angle;
 	t_vec3			first_inter_point;
 	t_vec3			increments;
-	t_vec3			secon_inter;
+	t_vec3			wall_inter;
 }					t_ray;
 
 typedef t_vec2int t_index;
