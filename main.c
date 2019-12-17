@@ -273,66 +273,59 @@ t_index get_map_index(t_vec3 position, t_map *map)
 
 t_tile *get_map_tile_ver(t_index m_index, t_map *map)
 {
-	// printf("index.y : %d, height: %d, index.x : %d, width : %d\n", m_index.y, map->height, m_index.x, map->width);
 	if (m_index.x >= 0 && m_index.y >= 0 && m_index.y < map->height && m_index.x < map->width)
 	{
 		if (map->tiles[m_index.y][m_index.x].depth)
 			return (&map->tiles[m_index.y][m_index.x]);
-			// printf("HHHHHHHHHHH\n");
-		// if (((m_index.y - 1) >= 0 && (m_index.y - 1) < map->height))//		&& map->tiles[m_index.y - 1][m_index.x].depth)
-		// 	return (&map->tiles[m_index.y - 1][m_index.x]);
 		if (((m_index.x - 1) >= 0 && (m_index.x - 1) < map->width))//		&& map->tiles[m_index.y - 1][m_index.x].depth)
 			return (&map->tiles[m_index.y][m_index.x - 1]);
 	}
-		
 	return (NULL);
 }
 
 t_tile *get_map_tile_hor(t_index m_index, t_map *map)
 {
-	// printf("index.y : %d, height: %d, index.x : %d, width : %d\n", m_index.y, map->height, m_index.x, map->width);
 	if (m_index.x >= 0 && m_index.y >= 0 && m_index.y < map->height && m_index.x < map->width)
 	{
 		if (map->tiles[m_index.y][m_index.x].depth)
 			return (&map->tiles[m_index.y][m_index.x]);
-			// printf("HHHHHHHHHHH\n");
 		if (((m_index.y - 1) >= 0 && (m_index.y - 1) < map->height))//		&& map->tiles[m_index.y - 1][m_index.x].depth)
 			return (&map->tiles[m_index.y - 1][m_index.x]);
-		// if (((m_index.x - 1) >= 0 && (m_index.x - 1) < map->width))//		&& map->tiles[m_index.y - 1][m_index.x].depth)
-		// 	return (&map->tiles[m_index.y][m_index.x - 1]);
 	}
-		
 	return (NULL);
 }
 
 void ft_find_closest_wall(t_ray *ray, t_map *map, t_player *player, SDL_Surface *surface)
 {
-	t_index m_index;
-	t_tile *tile;
+	// t_index m_index;
+	t_tile *tile = &map->tiles[0][0];
 	t_vec3 i = ray->first_hor_point;
-	m_index = get_map_index(i, map);
+	// m_index = get_map_index(i, map);
 	// t_index player_index = get_map_index(player->pos, map);
 	// printf("m_indexx: %d m_indexy: %d\n", m_index.x, m_index.y);
-	while ((tile = get_map_tile_hor( get_map_index(i, map), map )))
-	{
-		if (tile->depth == 1)
-			put_pixel32(surface, i.x, i.y, 0xFFFF0000);
-		i = ft_vec3_add(i, ray->increments_h);
-	}
 	t_vec3 j = ray->first_ver_point;
-	while ((tile = get_map_tile_ver( get_map_index(j, map), map )))
+	while (tile)
 	{
-		if (tile->depth == 1)
-			put_pixel32(surface, j.x, j.y, 0xFFFF0000);
-		j = ft_vec3_add(j, ray->increments_v);
+		if ((tile = get_map_tile_hor( get_map_index(i, map), map )))
+		{
+			if (tile->depth == 1)
+				put_pixel32(surface, i.x, i.y, 0xFFFF0000);
+			i = ft_vec3_add(i, ray->increments_h);
+		}
+		if ((tile = get_map_tile_ver( get_map_index(j, map), map )))
+		{
+			if (tile->depth == 1)
+				put_pixel32(surface, j.x, j.y, 0xFFFF0000);
+			j = ft_vec3_add(j, ray->increments_v);
+		}
 	}
 // if (m_index.x < 0 || m_index.y < 0 || !(tile = get_map_tile(m_index, map)))
 // {
 // 	printf("first inter out of array !! \n");
 // 	exit(1);
 // }
-	if (tile != NULL && tile->depth == 1)
-		printf("first inter is a wall-----inter at: (%f, %f)-----------------------> Array [%d, %d]\n", i.x, i.y, m_index.x, m_index.y);
+	// if (tile != NULL && tile->depth == 1)
+	// 	printf("first inter is a wall-----inter at: (%f, %f)-----------------------> Array [%d, %d]\n", i.x, i.y, m_index.x, m_index.y);
 
 	(void)ray;
 	(void)map;

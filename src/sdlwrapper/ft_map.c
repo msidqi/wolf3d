@@ -124,5 +124,7 @@ t_map	*ft_create_map(int width, int height)
 		}
 	}
 	map->tiles[3][4].depth = 1;
+	map->tiles[3][3].depth = 1;
+	map->tiles[2][3].depth = 1;
 	return (map);
 }
