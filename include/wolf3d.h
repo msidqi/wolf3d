@@ -30,8 +30,10 @@ typedef struct		s_ray
 	t_vec3			dir;
 	double			t;
 	double			angle;
-	t_vec3			first_inter_point;
-	t_vec3			increments;
+	t_vec3			first_ver_point;
+	t_vec3			first_hor_point;
+	t_vec3			increments_v;
+	t_vec3			increments_h;
 	t_vec3			wall_inter;
 }					t_ray;
 

@@ -116,12 +116,13 @@ t_map	*ft_create_map(int width, int height)
 		{
 			map->tiles[i][j].width = 100;
 			map->tiles[i][j].height = 100;
-			if (j > 5)
-				map->tiles[i][j].depth = 1;
-			else
+			// if (j > 5)
+			// 	map->tiles[i][j].depth = 1;
+			// else
 				map->tiles[i][j].depth = 0;
 			map->tiles[i][j].pos = (t_vec3int){ i, j, 0 };
 		}
 	}
+	map->tiles[3][4].depth = 1;
 	return (map);
 }
