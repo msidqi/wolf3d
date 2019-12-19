@@ -6,6 +6,7 @@
         "locale": "c",
         "string": "c",
         "wolf3d.h": "c",
-        "sdl_timer.h": "c"
+        "sdl_timer.h": "c",
+        "iterator": "c"
     }
 }

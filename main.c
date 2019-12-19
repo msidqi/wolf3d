@@ -295,40 +295,101 @@ t_tile *get_map_tile_hor(t_index m_index, t_map *map)
 	return (NULL);
 }
 
+typedef	struct		s_inter
+{
+	t_vec3			point;
+	double			distance;
+	int				intersected;
+	struct s_inter	*next;
+}					t_inter;
+
 void ft_find_closest_wall(t_ray *ray, t_map *map, t_player *player, SDL_Surface *surface)
 {
 	// t_index m_index;
 	t_tile *tile = &map->tiles[0][0];
 	t_tile *tile2 = &map->tiles[0][0];
-	double distance;
-	double distance2;
+	// double distance;
+	// double distance2;
 	t_vec3 i = ray->first_hor_point;
 	t_vec3 j = ray->first_ver_point;
-	while (tile || tile2)
+	// t_vec3 i2;
+	// t_vec3 j2;
+	int c = 0x0;
+	int c2 = 0x0;
+	// int draw;
+	// t_inter	hor[3];
+	// t_inter	ver[3];
+	// for (size_t p = 0; p < 3; p++)
+	// {
+	// 	ver[p].distance = -1;
+	// 	hor[p].distance = -1;
+	// }
+	
+	t_inter	hor;
+	t_inter	ver;
+	hor.intersected = 0;
+	ver.intersected = 0;
+	hor.distance = MEGA;
+	ver.distance = MEGA;
+	// int counter_h = 0;
+	// int counter_v = 0;
+	while ((tile || tile2) && (!hor.intersected || !ver.intersected))
 	{
-		distance = MEGA;
-		distance2 = MEGA;
-		if ((tile = get_map_tile_hor( get_map_index(i, map), map )))
+		// draw = 0;
+		// distance = MEGA;
+		// distance2 = MEGA;
+		if (!hor.intersected && (tile = get_map_tile_hor( get_map_index(i, map), map )))
 		{
 			if (tile->depth == 1)
 			{
-				distance = ft_vec3_mag(ft_vec3_sub(i, player->pos));
-				put_pixel32(surface, i.x, i.y, 0xFFFF0000);
+				hor.distance = ft_vec3_mag(ft_vec3_sub(i, player->pos));
+				// hor[counter_h].distance = distance;
+				// hor[counter_h].point = i;
+				// put_pixel32(surface, i.x, i.y, 0xFFFF0000  + c);
+				c += 0x5599;
+				printf("distance to hor %f\n", hor.distance);
+				// draw = 1;
+				hor.point = i;
+				hor.intersected = 1;
+				tile = NULL;
 			}
 			i = ft_vec3_add(i, ray->increments_h);
 		}
-		if ((tile2 = get_map_tile_ver( get_map_index(j, map), map )))
+		if (!ver.intersected && (tile2 = get_map_tile_ver( get_map_index(j, map), map )))
 		{
 			if (tile2->depth == 1)
 			{
-				distance2 = ft_vec3_mag(ft_vec3_sub(j, player->pos));
-				put_pixel32(surface, j.x, j.y, 0xFFFF0000);
+				ver.distance = ft_vec3_mag(ft_vec3_sub(j, player->pos));
+				// ver[counter_v].distance = distance2;
+				// ver[counter_v].point = j;
+				// put_pixel32(surface, j.x, j.y, 0xFF00FF00 + c2);
+				c2 += 0x330099;
+				printf("distance to ver %f\n", ver.distance);
+				// draw = ((distance2 <= distance) || !tile) ? 2 : 1;
+				ver.point = j;
+				ver.intersected = 1;
+				tile2 = NULL;
 			}
 			// if (tile->depth == 1)
 			// 	put_pixel32(surface, i.x, i.y, 0xFFFF0000);
 			j = ft_vec3_add(j, ray->increments_v);
 		}
-		break ;
+		// if (draw == 1)
+		// {
+		// 	put_pixel32(surface, i2.x, i2.y, 0xFFFF0000);
+		// 	// j = ft_vec3_add(j, ray->increments_v);
+		// 	// continue;
+		// 	break ;
+		// }
+		// else if (draw == 2)
+		// {
+		// 	put_pixel32(surface, j2.x, j2.y, 0xFFFF0000);
+		// 	break ;
+		// 	// i = ft_vec3_add(i, ray->increments_h);
+		// 	// continue;
+		// }
+
+		// break ;
 // if (distance < distance2)
 // {
 // 	put_pixel32(surface, i.x, i.y, 0xFFFF0000);
@@ -351,8 +412,25 @@ void ft_find_closest_wall(t_ray *ray, t_map *map, t_player *player, SDL_Surface 
 		// 	else if (tile && tile->depth == 1 && (ft_vec3_mag(ft_vec3_sub(i, player->pos)) <= ft_vec3_mag(ft_vec3_sub(j, player->pos))))
 		// 		put_pixel32(surface, i.x, i.y, 0xFFFF0000);
 		// }
-		printf("distance to hor %f distance to ver %f\n", ft_vec3_mag(ft_vec3_sub(i, player->pos)), ft_vec3_mag(ft_vec3_sub(j, player->pos)));
+		// counter_v++;
+		// counter_h++;
+		// if (counter_v == 2 || counter_v == 2)
+		// 	break ;
 	}
+	if (hor.distance < ver.distance)
+		put_pixel32(surface, hor.point.x, hor.point.y, 0xFFFF0000);
+	else if (ver.distance >= ver.distance && ver.distance != MEGA)
+		put_pixel32(surface, ver.point.x, ver.point.y, 0xFF00FF00);
+	// for (int c = 0; c < 3; c++)
+	// {
+	// 	if (c < counter_v)
+	// 		printf("distance to hor %f\n", hor[c].distance);
+	// 	if (c < counter_h)
+	// 		printf("distance to ver %f\n", ver[c].distance);
+	// 	printf("-------\n");
+	// }
+	
+		// printf("distance to hor %f distance to ver %f\n", distance, distance2);//ft_vec3_mag(ft_vec3_sub(i, player->pos)), ft_vec3_mag(ft_vec3_sub(j, player->pos)));
 	(void)ray;
 	(void)map;
 	(void)player;
@@ -388,6 +466,7 @@ void	ft_ray_cast(t_player *player, t_map *map, SDL_Surface *surface)
 // 	put_pixel32(surface, ray.first_ver_point.x - 1, ray.first_ver_point.y, 0xFF00FF00);
 // 	put_pixel32(surface, ray.first_ver_point.x, ray.first_ver_point.y - 1, 0xFF00FF00);
 // }
+		// if (x == 0)
 		ft_find_closest_wall(&ray, map, player, surface);
 		//SECOND
 		// if (ray.wall_inter.x > 0 && ray.wall_inter.y > 0 && ray.wall_inter.x <= map->width * TILE_WIDTH && ray.wall_inter.y <= map->height * TILE_HEIGHT)
