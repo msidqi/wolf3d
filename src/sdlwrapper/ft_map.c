@@ -58,23 +58,21 @@ void ft_draw_map(SDL_Surface *surface, t_map *map, t_player *player)
 	while (++l <= map->width)
 	{
 		k = -1;
-		while (++k < map->height * 100)
+		while (++k < map->height * MINI_MAP_TILE_HEIGHT)
 		{
-			put_pixel32(surface, l * 100, k, 0xFFFFFFFF);
+			put_pixel32(surface, l * MINI_MAP_TILE_WIDTH, k, 0xFFFFFFFF);
 		}
-		// exit(1);
 	}
 	k = -1;
 	while (++k <= map->height)
 	{
 		l = -1;
-		while (++l < map->width * 100)
+		while (++l < map->width * MINI_MAP_TILE_WIDTH)
 		{
-			put_pixel32(surface, l, k * 100, 0xFFFFFFFF);
+			put_pixel32(surface, l, k * MINI_MAP_TILE_HEIGHT, 0xFFFFFFFF);
 		}
 	}
-	(void)player;
-	(void)surface;
+	put_pixel32(surface, player->pos.x / MINI_MAP_RATIO_WIDTH, player->pos.y / MINI_MAP_RATIO_HEIGHT, 0xFF00FFFF);
 }
 
 void	ft_destroy_map(t_map *map)
@@ -114,11 +112,13 @@ t_map	*ft_create_map(int width, int height)
 		map->tiles[i] = (t_tile *)malloc(sizeof(t_tile) * width);
 		while (++j < width)
 		{
-			map->tiles[i][j].width = 100;
-			map->tiles[i][j].height = 100;
-			// if (j > 5)
-			// 	map->tiles[i][j].depth = 1;
-			// else
+			map->tiles[i][j].width = TILE_WIDTH;
+			map->tiles[i][j].height = TILE_HEIGHT;
+			map->tiles[i][j].index.x = j;
+			map->tiles[i][j].index.y = i;
+			if (i == 0 || j == 0 || i == height - 1)
+				map->tiles[i][j].depth = 1;
+			else
 				map->tiles[i][j].depth = 0;
 			map->tiles[i][j].pos = (t_vec3int){ i, j, 0 };
 		}
@@ -126,5 +126,6 @@ t_map	*ft_create_map(int width, int height)
 	map->tiles[3][4].depth = 1;
 	map->tiles[3][3].depth = 1;
 	map->tiles[2][3].depth = 1;
+	map->tiles[0][0].depth = 1;
 	return (map);
 }

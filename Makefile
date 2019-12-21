@@ -14,6 +14,7 @@ NAME2 = wolf3d
 NAME = callOfDuty_ModernWarfare
 LIBSDL = src/libSDL/libSDL2-2.0.0.dylib
 LIBSDL_ttf = src/libSDL_ttf/libSDL2_ttf-2.0.0.dylib
+LIBSDL_image = src/libSDL_image/libSDL2_image.dylib 
 LIBGL_PATH = src/libgl/
 LIBGLL = src/libgl/src/libgl.a
 SRC_PATH = src
@@ -21,18 +22,19 @@ GLSRC_PATH = src/libgl
 WRAP_SRC = src/sdlwrapper/*.c
 INCLUDE = include
 INC = include/libgl.h
+WOLF_H = include/wolf3d.h
 OBJS_DIR = .objs
 CC = gcc -Wall -Wextra -Werror
 OBJ = $(addprefix $(OBJS_DIR)/,$(WRAP_SRC:.c=.o))
 
 all : $(NAME)
 
-$(OBJ) : $(OBJS_DIR)/%.o : $(WRAP_SRC)/%.c $(INC) | $(OBJS_DIR)
+$(OBJ) : $(OBJS_DIR)/%.o : $(WRAP_SRC)/%.c $(WOLF_H) | $(OBJS_DIR)
 	$(CC) -c $< -o $@ -I$(INCLUDE)
 $(LIBGLL) :
 	make -C $(LIBGL_PATH)
-$(NAME) : $(WRAP_SRC) main.c $(LIBGLL)
-	$(CC) $^ -o $@ -I$(INCLUDE) $(LIBSDL) $(LIBSDL_ttf) $(LIBGLL)
+$(NAME) : main.c $(WRAP_SRC) $(LIBGLL) $(WOLF_H)
+	$(CC) -o $@ $< $(WRAP_SRC) -I$(INCLUDE) $(LIBSDL) $(LIBSDL_ttf) $(LIBSDL_image) $(LIBGLL)
 
 clean :
 	make fclean -C $(LIBGL_PATH)
