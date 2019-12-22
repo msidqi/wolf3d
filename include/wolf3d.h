@@ -123,6 +123,7 @@ typedef struct s_map
 }				t_map;
 
 void putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel);
+Uint32 getpixel(SDL_Surface *surface, int x, int y);
 Uint32 get_pixel32(SDL_Surface *surface, int x, int y);
 void put_pixel32(SDL_Surface *surface, int x, int y, Uint32 pixel);
 SDL_Window *ft_sdl_init_create_window(int win_pos_x, int win_pos_y, int win_width, int win_height);

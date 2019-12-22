@@ -50,10 +50,37 @@ void ft_print_map(t_map *map, t_player *player)
 	}
 }
 
+void ft_fill_wall(int x, int y, SDL_Surface *surface, t_map *map)
+{
+	int tmp;
+	int tmp1;
+		printf("here\n");
+	tmp1 = y;
+	while (tmp1 < y + MINI_MAP_TILE_HEIGHT)
+	{
+		tmp = x;
+		while (tmp < MINI_MAP_TILE_WIDTH + x)
+		{
+			 put_pixel32(surface, tmp++, tmp1, 0x99FFFFFF);
+		}
+		tmp1++;
+	}
+	(void)map;
+	(void)surface;
+}
 void ft_draw_map(SDL_Surface *surface, t_map *map, t_player *player)
 {
 	int k, l;
-
+	k = -1;
+	while (++k < map->width)
+	{
+		l = -1;
+		while (++l < map->height)
+		{
+			if (map->tiles[l][k].depth)
+				ft_fill_wall(k * MINI_MAP_TILE_WIDTH, l * MINI_MAP_TILE_HEIGHT, surface, map);
+		}
+	}
 	l = -1;
 	while (++l <= map->width)
 	{
@@ -73,6 +100,11 @@ void ft_draw_map(SDL_Surface *surface, t_map *map, t_player *player)
 		}
 	}
 	put_pixel32(surface, player->pos.x / MINI_MAP_RATIO_WIDTH, player->pos.y / MINI_MAP_RATIO_HEIGHT, 0xFF00FFFF);
+	put_pixel32(surface, player->pos.x / MINI_MAP_RATIO_WIDTH + 1, player->pos.y / MINI_MAP_RATIO_HEIGHT, 0xFF00FFFF);
+	put_pixel32(surface, player->pos.x / MINI_MAP_RATIO_WIDTH, player->pos.y / MINI_MAP_RATIO_HEIGHT + 1, 0xFF00FFFF);
+	put_pixel32(surface, player->pos.x / MINI_MAP_RATIO_WIDTH - 1, player->pos.y / MINI_MAP_RATIO_HEIGHT, 0xFF00FFFF);
+	put_pixel32(surface, player->pos.x / MINI_MAP_RATIO_WIDTH, player->pos.y / MINI_MAP_RATIO_HEIGHT - 1, 0xFF00FFFF);
+	(void)player;
 }
 
 void	ft_destroy_map(t_map *map)

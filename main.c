@@ -148,7 +148,7 @@ t_player *ft_create_player()
 	t_player *player;
 
 	player = (t_player *)malloc(sizeof(t_player));
-	player->pos = (t_vec3){ 505, 310, 0 };
+	player->pos = (t_vec3){ 105, 105, 0 };
 	player->forw = ft_vec3_normalize((t_vec3){ -1, 0, 0 });
 	player->right = ft_vec3_normalize(ft_vec3_cross_product(player->forw, FORW));
 	// printf("right: %f, %f, %f\n" , player->right.x, player->right.y, player->right.z);
@@ -453,25 +453,21 @@ SDL_Surface **get_all_textures()
 	return (game_textures);
 }
 
-int get_wall_texture(int x, int y, t_wall wall)
-{
-	int color;
-	
-	color = 0x44C3EE91;
-	if (wall.facing == NORTH)
-		color = 0xFFe8e8e8;
-	else if (wall.facing == SOUTH)
-		color = 0xFF75161f;
-	else if (wall.facing == EAST)
-		color = 0xFFfffa7f;
-	else if (wall.facing == WEST)
-		color = 0xFFcba8ee;
-	// else if (wall.facing == SKYBOX)
-	// 	color = 0xFF9eff00;
+int get_wall_texture(int x, int y, t_wall wall, SDL_Surface *bmp)
+{	
+	SDL_Surface **textures;
+	textures = get_all_textures();
+	//((double)x / BMP_WIDTH)
+	//(double)y / bmp->h
+	//(((int)wall.inter_point.x % 100) / TILE_WIDTH)
+	if (wall.facing == SKYBOX)
+		return (0xFFFFFFFF);
+	return (getpixel(textures[wall.facing],
+			(int)(((double)x / BMP_WIDTH) * textures[wall.facing]->w),
+			(int)(((double)y / bmp->h) * textures[wall.facing]->h)) + 0xFF000000);
 	(void)x;
-	(void)y;
-	return (color);
 }
+
 
 void ft_draw_walls(int x, t_wall wall, SDL_Surface *bmp)
 {
@@ -479,40 +475,37 @@ void ft_draw_walls(int x, t_wall wall, SDL_Surface *bmp)
 	int j;
 	int max_pixels;
 	int counter;
-	SDL_Surface **textures;
-	textures = get_all_textures();
 
 	if (wall.facing == SKYBOX)
 		return ;// draw skybox
 	i = bmp->h / 2;
 	j = i + 1;
-	max_pixels = (int)(bmp->h * 2 / wall.distance_from_origin + 20);
+	max_pixels = (int)(bmp->h / wall.distance_from_origin);
 	counter = 0;
 	while (counter < max_pixels)
 	{
-		// printf("counter\n");
 		if (i >= 0)
 		{
-			if (i == bmp->h / 2)
-				printf("x: %f | y: %f | t_width: %d | t_height %d\n", (double)x / BMP_WIDTH, (double)i / bmp->h, textures[wall.facing]->w, textures[wall.facing]->h);
-			// printf("%d | %d\n", (int)(((double)x / BMP_WIDTH) * textures[wall.facing]->w), (int)(((double)i / bmp->h) * textures[wall.facing]->h) );
-			// printf("%X\n", get_pixel32(textures[SOUTH], 50, 10));
-			put_pixel32(bmp, x, i, get_pixel32(textures[SOUTH],
-			(int)(((double)x / BMP_WIDTH) * textures[SOUTH]->w),
-			(int)(((double)i / bmp->h) * textures[SOUTH]->h)));//, get_wall_texture(x, i, wall)
+				// printf("x: %f | y: %f | t_width: %d | t_height %d\n", (double)x / BMP_WIDTH, (double)i / bmp->h, textures[wall.facing]->w, textures[wall.facing]->h);
+			// printf("%d | %d\n",
+			// (int)(((double)x / BMP_WIDTH) * textures[wall.facing]->w),
+			// (int)(((double)i / bmp->h) * textures[wall.facing]->h));
+			// printf("%X\n", get_pixel32(textures[SOUTH], 15, 55) + 0xFF000000);
+			put_pixel32(bmp, x, i, get_wall_texture(x, i, wall, bmp));//, get_wall_texture(x, i, wall)
 			i--;
 		}
 		if (j < bmp->h)
 		{
-			put_pixel32(bmp, x, j, get_wall_texture(x, j, wall));
+			put_pixel32(bmp, x, j, get_wall_texture(x, j, wall, bmp));
 			j++;
 		}
 		counter++;
 	}
-	// exit(1);
-	(void)x;
-	(void)bmp;
-	(void)wall;
+}
+
+void ft_draw_map_wall_inter(t_wall wall, SDL_Surface *bmp)
+{
+	put_pixel32(bmp, wall.inter_point.x / MINI_MAP_RATIO_WIDTH, wall.inter_point.y / MINI_MAP_RATIO_HEIGHT, 0xFFFF0000);
 }
 
 void	ft_ray_cast(t_player *player, t_map *map, SDL_Surface *bmp)
@@ -531,7 +524,39 @@ void	ft_ray_cast(t_player *player, t_map *map, SDL_Surface *bmp)
 
 		wall = ft_find_closest_wall(&ray, map, player, mapped_pos, bmp);
 		if (wall.facing != SKYBOX && wall.facing != GROUND)
+		{
 			ft_draw_walls(x, wall, bmp);
+			ft_draw_map_wall_inter(wall, bmp);
+		}
+	// exit(1);
+	}
+}
+
+void ft_fill_sky(SDL_Surface *bmp)
+{
+	int x;
+	int y;
+	x = 0;
+	while (x < bmp->w)
+	{
+		y = 0;
+		while (y < bmp->h / 2)
+		{
+			 put_pixel32(bmp, x, y, 0xFF5381FF);
+			 y++;
+		}
+		x++;
+	}
+	x = 0;
+	while (x < bmp->w)
+	{
+		y = bmp->h / 2;
+		while (y < bmp->h)
+		{
+			 put_pixel32(bmp, x, y, 0xFF717171);
+			 y++;
+		}
+		x++;
 	}
 }
 
@@ -568,6 +593,7 @@ int	main()
 			// printf("playerPos: %f, %f\nscanCode %d | keyCode %d \n", player->pos.x, player->pos.y, scan_code_down(event), key_code(event));
 		}
 		// ft_print_map(map, player);
+		ft_fill_sky(bmp);
 		ft_draw_map(bmp, map, player);
 		ft_ray_cast(player, map, bmp);
 		SDL_BlitSurface(bmp, NULL, display, NULL);
