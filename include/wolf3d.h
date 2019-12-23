@@ -23,6 +23,7 @@
 # define BACK (t_vec3){0, 0, 1}
 # define TILE_WIDTH 100
 # define TILE_HEIGHT 100
+# define TILE_DEPTH 100
 # define MINI_MAP_TILE_WIDTH 50
 # define MINI_MAP_TILE_HEIGHT 50
 # define MINI_MAP_RATIO_WIDTH (TILE_WIDTH / MINI_MAP_TILE_WIDTH)

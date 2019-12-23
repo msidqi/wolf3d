@@ -9,6 +9,7 @@
         "sdl_timer.h": "c",
         "iterator": "c",
         "limits.h": "c",
-        "sdl.h": "c"
+        "sdl.h": "c",
+        "__locale": "c"
     }
 }

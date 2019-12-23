@@ -148,7 +148,7 @@ t_player *ft_create_player()
 	t_player *player;
 
 	player = (t_player *)malloc(sizeof(t_player));
-	player->pos = (t_vec3){ 105, 105, 0 };
+	player->pos = (t_vec3){ 125, 125, 0 };
 	player->forw = ft_vec3_normalize((t_vec3){ -1, 0, 0 });
 	player->right = ft_vec3_normalize(ft_vec3_cross_product(player->forw, FORW));
 	// printf("right: %f, %f, %f\n" , player->right.x, player->right.y, player->right.z);
@@ -188,6 +188,7 @@ t_vec3	ft_limit_inter_by_map(t_vec3 position, t_map *map)
 
 void	ft_find_vertical_intersection(t_ray *ray, t_player *player, t_vec3 mapped_pos, t_map *map)
 {
+	(void)mapped_pos;
 	ray->dir = ft_vec3_normalize(ft_vec3_sub(mapped_pos, player->pos));
 	ray->origin = player->pos;
 	double dot = ft_vec3_dot_product(ray->dir, RIGHT);
@@ -233,6 +234,7 @@ void	ft_find_vertical_intersection(t_ray *ray, t_player *player, t_vec3 mapped_p
 
 void	ft_find_horizontal_intersection(t_ray *ray, t_player *player, t_vec3 mapped_pos, t_map *map)
 {
+	(void)mapped_pos;
 	ray->dir = ft_vec3_normalize(ft_vec3_sub(mapped_pos, player->pos));
 	// t_vec3 origin = player->pos;
 	double dot = ft_vec3_dot_product(ray->dir, DOWN); // positive y (to know which edge to pick)
@@ -338,7 +340,8 @@ t_wall ft_find_closest_wall(t_ray *ray, t_map *map, t_player *player, t_vec3 map
 	// 	ver[p].distance = -1;
 	// 	hor[p].distance = -1;
 	// }
-	
+	double cos_alpha;
+
 	t_inter	hor;
 	t_inter	ver;
 	hor.intersected = 0;
@@ -356,13 +359,15 @@ t_wall ft_find_closest_wall(t_ray *ray, t_map *map, t_player *player, t_vec3 map
 		{
 			if (tile->depth == 1)
 			{
-				hor.distance = ft_vec3_mag(ft_vec3_sub(i, player->pos));
+				cos_alpha = ft_vec3_dot_product(player->forw, ray->dir);
+				hor.distance = ft_vec3_mag(ft_vec3_sub(i, player->pos)) * cos_alpha;
 				// hor[counter_h].distance = distance;
 				// hor[counter_h].point = i;
 				// put_pixel32(surface, i.x, i.y, 0xFFFF0000  + c);
 				// c += 0x5599;
 				// printf("distance to hor %f\n", hor.distance);
-				hor.facing = (i.y / TILE_HEIGHT == tile->index.y) ? NORTH : SOUTH;
+				// printf("tile %d, %d\n", tile->index.x, tile->index.y);
+				hor.facing = ((int)(i.y / TILE_HEIGHT) == tile->index.y) ? NORTH : SOUTH;
 				// printf("tile %d, %d | facing %d\n", tile->index.x, tile->index.y, hor.facing);
 				// draw = 1;
 				hor.point = i;
@@ -375,15 +380,17 @@ t_wall ft_find_closest_wall(t_ray *ray, t_map *map, t_player *player, t_vec3 map
 		{
 			if (tile2->depth == 1)
 			{
-				ver.distance = ft_vec3_mag(ft_vec3_sub(j, player->pos));
+				cos_alpha = ft_vec3_dot_product(player->forw, ray->dir);
+				ver.distance = ft_vec3_mag(ft_vec3_sub(j, player->pos))  * cos_alpha;
 				// ver[counter_v].distance = distance2;
 				// ver[counter_v].point = j;
 				// put_pixel32(surface, j.x, j.y, 0xFF00FF00 + c2);
 				// c2 += 0x330099;
 				// printf("distance to ver %f\n", ver.distance);
 				// draw = ((distance2 <= distance) || !tile) ? 2 : 1;
+				// printf("j.x %f, j.y %f\n", j.x, j.y);
 				// printf("tile2 %d, %d\n", tile2->index.x, tile2->index.y);
-				ver.facing = (j.x / TILE_WIDTH == tile2->index.x) ? WEST : EAST;
+				ver.facing = ((int)(j.x / TILE_WIDTH) == tile2->index.x) ? WEST : EAST;
 				// printf("tile2 %d, %d | facing %d\n", tile2->index.x, tile2->index.y, ver.facing);
 				ver.point = j;
 				ver.intersected = 1;
@@ -456,16 +463,24 @@ SDL_Surface **get_all_textures()
 int get_wall_texture(int x, int y, t_wall wall, SDL_Surface *bmp)
 {	
 	SDL_Surface **textures;
+	int color;
+
 	textures = get_all_textures();
+	// color = getpixel(textures[wall.facing],
+	// 		(int)(((double)x / BMP_WIDTH) * textures[wall.facing]->w),
+	// 		(int)(((double)y / bmp->h) * textures[wall.facing]->h));
+	color = getpixel(textures[wall.facing],
+			(int)(x * textures[wall.facing]->w),
+			(int)(y * textures[wall.facing]->h));
 	//((double)x / BMP_WIDTH)
 	//(double)y / bmp->h
 	//(((int)wall.inter_point.x % 100) / TILE_WIDTH)
+	// printf("color: %X\n", color);
 	if (wall.facing == SKYBOX)
 		return (0xFFFFFFFF);
-	return (getpixel(textures[wall.facing],
-			(int)(((double)x / BMP_WIDTH) * textures[wall.facing]->w),
-			(int)(((double)y / bmp->h) * textures[wall.facing]->h)) + 0xFF000000);
+	return (0xFF000000 + color);
 	(void)x;
+	(void)bmp;
 }
 
 
@@ -473,34 +488,49 @@ void ft_draw_walls(int x, t_wall wall, SDL_Surface *bmp)
 {
 	int i;
 	int j;
-	int max_pixels;
 	int counter;
-
+	double wall_height;
 	if (wall.facing == SKYBOX)
 		return ;// draw skybox
 	i = bmp->h / 2;
 	j = i + 1;
-	max_pixels = (int)(bmp->h / wall.distance_from_origin);
+	// max_pixels = (int)(bmp->h / wall.distance_from_origin);// + 20)
 	counter = 0;
-	while (counter < max_pixels)
+	wall_height = (int)(bmp->h / wall.distance_from_origin);
+	int txt0;
+	int txt1;
+	txt0 = wall_height / 2;
+	txt1 = txt0 + 1;
+
+	double mapped_x;
+	if (wall.facing == NORTH || wall.facing == SOUTH)
+		mapped_x = (int)wall.inter_point.x % TILE_WIDTH / TILE_WIDTH;
+	else
+		mapped_x = (int)wall.inter_point.y % TILE_HEIGHT / TILE_HEIGHT;
+	while (counter < wall_height / 2)
 	{
-		if (i >= 0)
+		if (i >= 0 && txt0 >= 0)
 		{
+			// wall_height = (double)i / TILE_DEPTH;
+			//printf("wall_height %f\n ", wall_height);
 				// printf("x: %f | y: %f | t_width: %d | t_height %d\n", (double)x / BMP_WIDTH, (double)i / bmp->h, textures[wall.facing]->w, textures[wall.facing]->h);
 			// printf("%d | %d\n",
 			// (int)(((double)x / BMP_WIDTH) * textures[wall.facing]->w),
 			// (int)(((double)i / bmp->h) * textures[wall.facing]->h));
-			// printf("%X\n", get_pixel32(textures[SOUTH], 15, 55) + 0xFF000000);
-			put_pixel32(bmp, x, i, get_wall_texture(x, i, wall, bmp));//, get_wall_texture(x, i, wall)
+			// printf("mapped_x %d %d\n", mapped_x, txt0 / wall_height);
+			put_pixel32(bmp, x, i, get_wall_texture(mapped_x, txt0 / wall_height, wall, bmp));//, get_wall_texture(x, i, wall)
+			txt0--;
 			i--;
 		}
-		if (j < bmp->h)
+		if (j < bmp->h && txt1 < wall_height)
 		{
-			put_pixel32(bmp, x, j, get_wall_texture(x, j, wall, bmp));
+			put_pixel32(bmp, x, j, get_wall_texture(mapped_x, txt1 / wall_height, wall, bmp));
+			txt1++;
 			j++;
 		}
 		counter++;
 	}
+	(void)x;
 }
 
 void ft_draw_map_wall_inter(t_wall wall, SDL_Surface *bmp)
@@ -532,7 +562,7 @@ void	ft_ray_cast(t_player *player, t_map *map, SDL_Surface *bmp)
 	}
 }
 
-void ft_fill_sky(SDL_Surface *bmp)
+void ft_fill_background(SDL_Surface *bmp)
 {
 	int x;
 	int y;
@@ -593,7 +623,7 @@ int	main()
 			// printf("playerPos: %f, %f\nscanCode %d | keyCode %d \n", player->pos.x, player->pos.y, scan_code_down(event), key_code(event));
 		}
 		// ft_print_map(map, player);
-		ft_fill_sky(bmp);
+		ft_fill_background(bmp);
 		ft_draw_map(bmp, map, player);
 		ft_ray_cast(player, map, bmp);
 		SDL_BlitSurface(bmp, NULL, display, NULL);

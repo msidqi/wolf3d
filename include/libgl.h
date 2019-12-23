@@ -51,6 +51,7 @@ typedef enum		e_event_code
 	MOUSE_PRESS_CODE = 4,
 	MOUSE_MOVE_CODE = 6,
 	KEY_PRESS_CODE = 2,
+	KEY_RELEASE_CODE = 3,
 	RED_BUTTON_CODE = 17,
 }					t_event_code;
 

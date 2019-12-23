@@ -54,7 +54,7 @@ void ft_fill_wall(int x, int y, SDL_Surface *surface, t_map *map)
 {
 	int tmp;
 	int tmp1;
-		printf("here\n");
+
 	tmp1 = y;
 	while (tmp1 < y + MINI_MAP_TILE_HEIGHT)
 	{
