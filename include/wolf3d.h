@@ -152,6 +152,10 @@ typedef struct s_map
 	t_tile		**tiles;
 }				t_map;
 
+void ft_init_player_controller(t_player *player);
+void	ft_player_controller(t_player *player, SDL_Event event);
+void	ft_player_physics(t_player *player, t_map *map);
+void	ft_create_player(t_player *player, Uint32 x, Uint32 y, t_vec3 look_dir);
 int  ft_player_move(t_player *player, double speed);
 void ft_player_rotate(t_player *player, double rotation_angle);
 void putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel);

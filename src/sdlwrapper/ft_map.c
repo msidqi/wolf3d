@@ -155,7 +155,7 @@ t_map	*ft_create_map(int width, int height)
 			map->tiles[i][j].pos = (t_vec3int){ i, j, 0 };
 		}
 	}
-	map->tiles[3][4].depth = 1;
+	map->tiles[1][4].depth = 1;
 	map->tiles[3][3].depth = 1;
 	map->tiles[2][3].depth = 1;
 	map->tiles[0][0].depth = 1;
