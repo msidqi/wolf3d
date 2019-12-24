@@ -10,6 +10,8 @@
         "iterator": "c",
         "limits.h": "c",
         "sdl.h": "c",
-        "__locale": "c"
+        "__locale": "c",
+        "__bit_reference": "c",
+        "algorithm": "c"
     }
 }

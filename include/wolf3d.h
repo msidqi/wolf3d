@@ -33,6 +33,8 @@
 # define SURFACE_H_IS_ODD ((BMP_HEIGHT % 2 == 0) ? 0 : 1)
 # define TEXTURE_NUM 4
 # define ROTATION_ANGLE 0.0872665
+#define PLAYER_SPEED 5
+# define SECOND 1000000000
 // # define COS_ROTATION_ANGLE 0.99619469483
 // # define COS_N_ROTATION_ANGLE 0.99619469483
 // # define SIN_ROTATION_ANGLE 0.08715578
@@ -46,6 +48,15 @@ typedef enum	e_cardinal_direction
 	SKYBOX,
 	GROUND
 }				t_e_cardinal_direction;
+
+typedef struct	s_sdl_data
+{
+	SDL_Window	*win;
+	SDL_Surface	*bmp;
+	SDL_Surface	*display;
+	SDL_Event	event;
+	int			quit;
+}				t_sdl_data;
 
 typedef struct s_action
 {
@@ -86,17 +97,35 @@ typedef struct		s_ray
 }					t_ray;
 
 typedef t_vec2int t_index;
+
+
 typedef struct s_player
 {
 	t_vec3		pos;
+	t_vec3		to_move;
 	t_vec3		forw;
     t_vec3      right;
 	double		focal_len;
 	double		cam_hor;
 	double		cam_ver;
+	Uint16		controller[8];
+	int			(*move)(struct s_player *player, double speed);
+	void		(*rotate)(struct s_player *player, double rotation_angle);
+	double		rotation_angle;
+	double		speed;
 	// double		height;
     // t_camera    camera;
 }				t_player;
+
+typedef enum	e_player_controller_buttons
+{
+	PLAYER_FORWARD,
+	PLAYER_BACKWARDS,
+	PLAYER_TURN_LEFT,
+	PLAYER_TURN_RIGHT,
+	PLAYER_STRAFE_RIGHT,
+	PLAYER_STRAFE_LEFT,
+}				t_e_player_controller_buttons;
 
 // typedef struct s_texture
 // {
@@ -123,6 +152,8 @@ typedef struct s_map
 	t_tile		**tiles;
 }				t_map;
 
+int  ft_player_move(t_player *player, double speed);
+void ft_player_rotate(t_player *player, double rotation_angle);
 void putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel);
 Uint32 getpixel(SDL_Surface *surface, int x, int y);
 Uint32 get_pixel32(SDL_Surface *surface, int x, int y);
