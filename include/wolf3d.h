@@ -21,19 +21,19 @@
 # define RIGHT (t_vec3){1, 0, 0}
 # define FORW (t_vec3){0, 0, -1}
 # define BACK (t_vec3){0, 0, 1}
-# define TILE_WIDTH 100
-# define TILE_HEIGHT 100
-# define TILE_DEPTH 100
-# define MINI_MAP_TILE_WIDTH 50
-# define MINI_MAP_TILE_HEIGHT 50
+# define TILE_WIDTH 25
+# define TILE_HEIGHT 25
+# define TILE_DEPTH 25
+# define MINI_MAP_TILE_WIDTH 25
+# define MINI_MAP_TILE_HEIGHT 25
 # define MINI_MAP_RATIO_WIDTH (TILE_WIDTH / MINI_MAP_TILE_WIDTH)
 # define MINI_MAP_RATIO_HEIGHT (TILE_HEIGHT / MINI_MAP_TILE_HEIGHT)
 # define BMP_WIDTH 1280
 # define BMP_HEIGHT 721
 # define SURFACE_H_IS_ODD ((BMP_HEIGHT % 2 == 0) ? 0 : 1)
 # define TEXTURE_NUM 4
-# define ROTATION_ANGLE 0.0872665
-#define PLAYER_SPEED 5
+# define ROTATION_ANGLE 0.0372665
+#define PLAYER_SPEED 1
 # define SECOND 1000000000
 // # define COS_ROTATION_ANGLE 0.99619469483
 // # define COS_N_ROTATION_ANGLE 0.99619469483
@@ -109,7 +109,7 @@ typedef struct s_player
 	double		cam_hor;
 	double		cam_ver;
 	Uint16		controller[8];
-	int			(*move)(struct s_player *player, double speed);
+	void			(*move)(struct s_player *player, double speed);
 	void		(*rotate)(struct s_player *player, double rotation_angle);
 	double		rotation_angle;
 	double		speed;
@@ -152,25 +152,26 @@ typedef struct s_map
 	t_tile		**tiles;
 }				t_map;
 
-void ft_init_player_controller(t_player *player);
-void	ft_player_controller(t_player *player, SDL_Event event);
-void	ft_player_physics(t_player *player, t_map *map);
-void	ft_create_player(t_player *player, Uint32 x, Uint32 y, t_vec3 look_dir);
-int  ft_player_move(t_player *player, double speed);
-void ft_player_rotate(t_player *player, double rotation_angle);
-void putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel);
-Uint32 getpixel(SDL_Surface *surface, int x, int y);
-Uint32 get_pixel32(SDL_Surface *surface, int x, int y);
-void put_pixel32(SDL_Surface *surface, int x, int y, Uint32 pixel);
-SDL_Window *ft_sdl_init_create_window(int win_pos_x, int win_pos_y, int win_width, int win_height);
-SDL_Surface *ft_create_surface(SDL_Window *win, int win_width, int win_height, int bpp);
-int key_code(SDL_Event	event);
-int scan_code(SDL_Event	event);
-int scan_code_up(SDL_Event	event);
-int scan_code_down(SDL_Event	event);
-void ft_print_map(t_map *map, t_player *player);
-void ft_draw_map(SDL_Surface *surface, t_map *map, t_player *player);
-t_map	*ft_create_map(int width, int height);
-void	ft_destroy_map(t_map *map);
+void			ft_draw_player(SDL_Surface *surface, int ox, int oy);
+void			ft_init_player_controller(t_player *player);
+void			ft_player_controller(t_player *player, SDL_Event event);
+void			ft_player_physics(t_player *player, t_map *map);
+void			ft_create_player(t_player *player, Uint32 x, Uint32 y, t_vec3 look_dir);
+void			ft_player_move(t_player *player, double speed);
+void			ft_player_rotate(t_player *player, double rotation_angle);
+void			putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel);
+Uint32			getpixel(SDL_Surface *surface, int x, int y);
+Uint32			get_pixel32(SDL_Surface *surface, int x, int y);
+void			put_pixel32(SDL_Surface *surface, int x, int y, Uint32 pixel);
+SDL_Window		*ft_sdl_init_create_window(int win_pos_x, int win_pos_y, int win_width, int win_height);
+SDL_Surface		*ft_create_surface(SDL_Window *win, int win_width, int win_height, int bpp);
+int				key_code(SDL_Event	event);
+int				scan_code(SDL_Event	event);
+int				scan_code_up(SDL_Event	event);
+int				scan_code_down(SDL_Event	event);
+void			ft_print_map(t_map *map, t_player *player);
+void			ft_draw_map(SDL_Surface *surface, t_map *map, t_player *player);
+t_map			*ft_create_map(int width, int height);
+void			ft_destroy_map(t_map *map);
 
 #endif

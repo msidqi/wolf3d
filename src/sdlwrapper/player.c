@@ -1,6 +1,27 @@
 
 #include "wolf3d.h"
 
+void ft_draw_player(SDL_Surface *surface, int ox, int oy)
+{
+        int r;
+        int x;
+        int y;
+        int h;
+        r = 4;
+        x = -r;
+        while (x < r)
+        {
+                h = sqrt(r * r - x * x);
+                y = -h;
+                while (y < h)
+                {
+                        put_pixel32(surface, x + ox, y + oy, 0x99FF0000);
+                        y++;
+                }
+                x++;
+        }
+}
+
 void	ft_player_controller(t_player *player, SDL_Event event)
 {
 	Uint32 scan_code_d = scan_code_down(event);
@@ -8,7 +29,6 @@ void	ft_player_controller(t_player *player, SDL_Event event)
 	
 	if ( event.type == SDL_KEYDOWN && event.key.repeat == 0 )
 	{
-		printf("player->controller[PLAYER_TURN_RIGHT] %d\n", player->controller[PLAYER_TURN_RIGHT]);
 		switch (scan_code_d)
 		{
 			case SDL_SCANCODE_D:
@@ -29,27 +49,15 @@ void	ft_player_controller(t_player *player, SDL_Event event)
 				break;
 			case SDL_SCANCODE_LEFT:
 				player->controller[PLAYER_TURN_LEFT] = 1;
-				player->forw = (t_vec3){
-					cos(-ROTATION_ANGLE) * player->forw.x - sin(-ROTATION_ANGLE) * player->forw.y,
-					sin(-ROTATION_ANGLE) * player->forw.x + cos(-ROTATION_ANGLE) * player->forw.y
-					, 0};
-				player->right = ft_vec3_normalize(ft_vec3_cross_product(player->forw, FORW));
 				break;
 			case SDL_SCANCODE_RIGHT:
 				player->controller[PLAYER_TURN_RIGHT] = 1;
-				player->forw = (t_vec3){
-					cos(ROTATION_ANGLE) * player->forw.x - sin(ROTATION_ANGLE) * player->forw.y,
-					sin(ROTATION_ANGLE) * player->forw.x + cos(ROTATION_ANGLE) * player->forw.y
-					, 0};
-				player->right = ft_vec3_normalize(ft_vec3_cross_product(player->forw, FORW));
 				break;
 			case SDL_SCANCODE_UP:
 				player->controller[PLAYER_FORWARD] = 1;
-				player->pos = ft_vec3_add(player->forw, player->pos);
 				break;
 			case SDL_SCANCODE_DOWN:
 				player->controller[PLAYER_BACKWARDS] = 1;
-				player->pos = ft_vec3_add(ft_vec3_scalar(player->forw, -1), player->pos);
 				break;
 			case SDL_SCANCODE_G:
 				player->forw = (t_vec3){-1, 0, 0};
@@ -87,7 +95,6 @@ void	ft_player_controller(t_player *player, SDL_Event event)
 	}
 	else if (event.type == SDL_KEYUP)
 	{
-		printf("player->controller[PLAYER_TURN_RIGHT] %d\n", player->controller[PLAYER_TURN_RIGHT]);
 		switch (scan_code_u)
 		{
 			case SDL_SCANCODE_D:
@@ -171,7 +178,7 @@ void ft_player_rotate(t_player *player, double rotation_angle)
 	}
 }
 
-int  ft_player_move(t_player *player, double speed)
+void  ft_player_move(t_player *player, double speed)
 {
 	int moved;
 
@@ -193,16 +200,19 @@ int  ft_player_move(t_player *player, double speed)
 	}
 	if (player->controller[PLAYER_BACKWARDS])
 	{
-		player->to_move = ft_vec3_scalar(player->forw, -(speed / 3));
+		player->to_move = ft_vec3_scalar(player->forw, -(speed));
 		moved = 1;
 	}
-	return (moved);
+	if (moved)
+		player->pos = ft_vec3_add(player->pos, player->to_move);
+	// printf("x: %f y: %f z: %f\n", player->pos.x, player->pos.y, player->pos.z);
 }
 
 void	ft_player_physics(t_player *player, t_map *map)
 {
-	if (player->move(player, player->speed))
-		player->pos = ft_vec3_add(player->pos, player->to_move);
+	// if (player->move(player, player->speed))
+	// 	player->pos = ft_vec3_add(player->pos, player->to_move);
+	player->move(player, player->speed);
 	player->rotate(player, player->rotation_angle);
 	// ft_apply_player_physics(player);
 	(void)map;

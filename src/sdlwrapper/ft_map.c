@@ -68,7 +68,7 @@ void ft_fill_wall(int x, int y, SDL_Surface *surface, t_map *map)
 	(void)map;
 	(void)surface;
 }
-void ft_draw_map(SDL_Surface *surface, t_map *map, t_player *player)
+void ft_draw_map(SDL_Surface *bmp, t_map *map, t_player *player)
 {
 	int k, l;
 	k = -1;
@@ -78,7 +78,7 @@ void ft_draw_map(SDL_Surface *surface, t_map *map, t_player *player)
 		while (++l < map->height)
 		{
 			if (map->tiles[l][k].depth)
-				ft_fill_wall(k * MINI_MAP_TILE_WIDTH, l * MINI_MAP_TILE_HEIGHT, surface, map);
+				ft_fill_wall(k * MINI_MAP_TILE_WIDTH, l * MINI_MAP_TILE_HEIGHT, bmp, map);
 		}
 	}
 	l = -1;
@@ -87,7 +87,7 @@ void ft_draw_map(SDL_Surface *surface, t_map *map, t_player *player)
 		k = -1;
 		while (++k < map->height * MINI_MAP_TILE_HEIGHT)
 		{
-			put_pixel32(surface, l * MINI_MAP_TILE_WIDTH, k, 0xFFFFFFFF);
+			put_pixel32(bmp, l * MINI_MAP_TILE_WIDTH, k, 0xFFFFFFFF);
 		}
 	}
 	k = -1;
@@ -96,14 +96,15 @@ void ft_draw_map(SDL_Surface *surface, t_map *map, t_player *player)
 		l = -1;
 		while (++l < map->width * MINI_MAP_TILE_WIDTH)
 		{
-			put_pixel32(surface, l, k * MINI_MAP_TILE_HEIGHT, 0xFFFFFFFF);
+			put_pixel32(bmp, l, k * MINI_MAP_TILE_HEIGHT, 0xFFFFFFFF);
 		}
 	}
-	put_pixel32(surface, player->pos.x / MINI_MAP_RATIO_WIDTH, player->pos.y / MINI_MAP_RATIO_HEIGHT, 0xFF00FFFF);
-	put_pixel32(surface, player->pos.x / MINI_MAP_RATIO_WIDTH + 1, player->pos.y / MINI_MAP_RATIO_HEIGHT, 0xFF00FFFF);
-	put_pixel32(surface, player->pos.x / MINI_MAP_RATIO_WIDTH, player->pos.y / MINI_MAP_RATIO_HEIGHT + 1, 0xFF00FFFF);
-	put_pixel32(surface, player->pos.x / MINI_MAP_RATIO_WIDTH - 1, player->pos.y / MINI_MAP_RATIO_HEIGHT, 0xFF00FFFF);
-	put_pixel32(surface, player->pos.x / MINI_MAP_RATIO_WIDTH, player->pos.y / MINI_MAP_RATIO_HEIGHT - 1, 0xFF00FFFF);
+	// ft_draw_player(bmp, player->pos.x, player->pos.y);
+	put_pixel32(bmp, player->pos.x / MINI_MAP_RATIO_WIDTH, player->pos.y / MINI_MAP_RATIO_HEIGHT, 0xFF00FFFF);
+	put_pixel32(bmp, player->pos.x / MINI_MAP_RATIO_WIDTH + 1, player->pos.y / MINI_MAP_RATIO_HEIGHT, 0xFF00FFFF);
+	put_pixel32(bmp, player->pos.x / MINI_MAP_RATIO_WIDTH, player->pos.y / MINI_MAP_RATIO_HEIGHT + 1, 0xFF00FFFF);
+	put_pixel32(bmp, player->pos.x / MINI_MAP_RATIO_WIDTH - 1, player->pos.y / MINI_MAP_RATIO_HEIGHT, 0xFF00FFFF);
+	put_pixel32(bmp, player->pos.x / MINI_MAP_RATIO_WIDTH, player->pos.y / MINI_MAP_RATIO_HEIGHT - 1, 0xFF00FFFF);
 	(void)player;
 }
 
