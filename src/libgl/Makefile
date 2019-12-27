@@ -19,7 +19,8 @@ drawsquares.c ft_utils_func.c ft_vector_operations.c \
 ft_atof.c ft_min_max.c ft_vec_create.c ft_vector_sub.c \
 ft_multi_thread.c ft_vec_cross_dot_prod.c \
 ft_color_operations.c ft_vec_destroy.c interface.c \
-ft_screenshot.c ft_vec_normalize_magnitude.c ft_put_vectors.c
+ft_screenshot.c ft_vec_normalize_magnitude.c ft_put_vectors.c \
+ft_rotate_vector.c strings.c
 INCLUDE = include
 INC = include/libgl.h
 OBJS_DIR = .objs

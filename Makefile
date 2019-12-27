@@ -16,7 +16,9 @@ LIBSDL = src/libSDL/libSDL2-2.0.0.dylib
 LIBSDL_ttf = src/libSDL_ttf/libSDL2_ttf-2.0.0.dylib
 LIBSDL_image = src/libSDL_image/libSDL2_image.dylib 
 LIBGL_PATH = src/libgl/
-LIBGLL = src/libgl/src/libgl.a
+LIBGLL = $(LIBGL_PATH)src/libgl.a
+LIBFT_PATH = libft/
+LIBFTL = $(LIBFT_PATH)libft.a
 SRC_PATH = src
 GLSRC_PATH = src/libgl
 WRAP_SRC = src/sdlwrapper/*.c
@@ -33,11 +35,14 @@ $(OBJ) : $(OBJS_DIR)/%.o : $(WRAP_SRC)/%.c $(WOLF_H) | $(OBJS_DIR)
 	$(CC) -c $< -o $@ -I$(INCLUDE)
 $(LIBGLL) :
 	make -C $(LIBGL_PATH)
-$(NAME) : main.c $(WRAP_SRC) $(LIBGLL) $(WOLF_H)
-	$(CC) -o $@ $< $(WRAP_SRC) -I$(INCLUDE) $(LIBSDL) $(LIBSDL_ttf) $(LIBSDL_image) $(LIBGLL)
+$(LIBFTL) :
+	make -C $(LIBFT_PATH)
+$(NAME) : main.c $(WRAP_SRC) $(LIBGLL) $(LIBFTL) $(WOLF_H)
+	$(CC) -o $@ $< $(WRAP_SRC) -I$(INCLUDE) $(LIBSDL) $(LIBSDL_ttf) $(LIBSDL_image) $(LIBGLL) $(LIBFTL)
 
 clean :
 	make fclean -C $(LIBGL_PATH)
+	make fclean -C $(LIBFT_PATH)
 	rm -rf $(OBJ) 
 #$(LIBGLL)   gcc main.c src/sdlwrapper/*.c -o wolf -I include  libSDL/libSDL2-2.0.0.dylib
 fclean : clean

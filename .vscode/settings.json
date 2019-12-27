@@ -12,6 +12,8 @@
         "sdl.h": "c",
         "__locale": "c",
         "__bit_reference": "c",
-        "algorithm": "c"
+        "algorithm": "c",
+        "libgl.h": "c",
+        "errno.h": "c"
     }
 }

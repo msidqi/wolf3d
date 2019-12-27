@@ -23,3 +23,8 @@ int scan_code_down(SDL_Event	event)
 		return (event.key.keysym.scancode);
 	return (0);
 }
+
+int	ft_shift_is_down(void)
+{
+	return ((SDL_GetModState() & KMOD_SHIFT));
+}

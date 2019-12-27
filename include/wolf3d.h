@@ -9,7 +9,9 @@
 # include <stdio.h>
 # include <stdlib.h>
 # include <limits.h>
+# include <errno.h>
 # include "libgl.h"
+# include "libft.h"
 # define HEIGHT 500
 # define WIDTH 500
 # define WIN_HEIGHT 720
@@ -21,19 +23,21 @@
 # define RIGHT (t_vec3){1, 0, 0}
 # define FORW (t_vec3){0, 0, -1}
 # define BACK (t_vec3){0, 0, 1}
-# define TILE_WIDTH 25
-# define TILE_HEIGHT 25
-# define TILE_DEPTH 25
+# define TILE_WIDTH 3
+# define TILE_HEIGHT 3
+# define TILE_DEPTH 3
 # define MINI_MAP_TILE_WIDTH 25
 # define MINI_MAP_TILE_HEIGHT 25
-# define MINI_MAP_RATIO_WIDTH (TILE_WIDTH / MINI_MAP_TILE_WIDTH)
-# define MINI_MAP_RATIO_HEIGHT (TILE_HEIGHT / MINI_MAP_TILE_HEIGHT)
+# define MINI_MAP_RATIO_WIDTH ((double)TILE_WIDTH / (double)MINI_MAP_TILE_WIDTH)
+# define MINI_MAP_RATIO_HEIGHT ((double)TILE_HEIGHT / (double)MINI_MAP_TILE_HEIGHT)
 # define BMP_WIDTH 1280
 # define BMP_HEIGHT 721
+# define MINI_MAP_BMP_HEIGHT 400
+# define MINI_MAP_BMP_WIDTH 400
 # define SURFACE_H_IS_ODD ((BMP_HEIGHT % 2 == 0) ? 0 : 1)
 # define TEXTURE_NUM 4
 # define ROTATION_ANGLE 0.0372665
-#define PLAYER_SPEED 1
+# define PLAYER_SPEED 0.2
 # define SECOND 1000000000
 // # define COS_ROTATION_ANGLE 0.99619469483
 // # define COS_N_ROTATION_ANGLE 0.99619469483
@@ -49,10 +53,18 @@ typedef enum	e_cardinal_direction
 	GROUND
 }				t_e_cardinal_direction;
 
+typedef enum	e_intersected_obj_type
+{
+	WALL,
+	PROJECTILE,
+	ENEMY,
+}				t_e_intersected_obj_type;
+
 typedef struct	s_sdl_data
 {
 	SDL_Window	*win;
 	SDL_Surface	*bmp;
+	SDL_Surface	*mini_map_bmp;
 	SDL_Surface	*display;
 	SDL_Event	event;
 	int			quit;
@@ -76,12 +88,19 @@ typedef	struct		s_wall
 	int				facing;
 	double			distance_from_origin;
 	t_vec3			inter_point;
+	double			wall_height;
 }					t_wall;
 
-typedef	struct		s_texture
+typedef SDL_Surface t_texture;
+
+typedef struct		s_ray_hit
 {
-	SDL_Surface		*img;
-}					t_texture;
+	int				facing;
+	int				type;
+	double			distance_from_origin;
+	t_vec3			point;
+	double			wall_height;
+}					t_ray_hit;
 
 typedef struct		s_ray
 {
@@ -93,45 +112,10 @@ typedef struct		s_ray
 	t_vec3			first_hor_point;
 	t_vec3			increments_v;
 	t_vec3			increments_h;
-	t_vec3			wall_inter;
+	t_ray_hit		ray_hit;
 }					t_ray;
 
 typedef t_vec2int t_index;
-
-
-typedef struct s_player
-{
-	t_vec3		pos;
-	t_vec3		to_move;
-	t_vec3		forw;
-    t_vec3      right;
-	double		focal_len;
-	double		cam_hor;
-	double		cam_ver;
-	Uint16		controller[8];
-	void			(*move)(struct s_player *player, double speed);
-	void		(*rotate)(struct s_player *player, double rotation_angle);
-	double		rotation_angle;
-	double		speed;
-	// double		height;
-    // t_camera    camera;
-}				t_player;
-
-typedef enum	e_player_controller_buttons
-{
-	PLAYER_FORWARD,
-	PLAYER_BACKWARDS,
-	PLAYER_TURN_LEFT,
-	PLAYER_TURN_RIGHT,
-	PLAYER_STRAFE_RIGHT,
-	PLAYER_STRAFE_LEFT,
-}				t_e_player_controller_buttons;
-
-// typedef struct s_texture
-// {
-// 	SDL_Surface	pixels;
-// 	double		height;
-// }				t_texture;
 
 typedef struct s_tile
 {
@@ -152,26 +136,67 @@ typedef struct s_map
 	t_tile		**tiles;
 }				t_map;
 
+typedef enum	e_player_controller_buttons
+{
+	PLAYER_FORWARD,
+	PLAYER_BACKWARDS,
+	PLAYER_TURN_LEFT,
+	PLAYER_TURN_RIGHT,
+	PLAYER_STRAFE_RIGHT,
+	PLAYER_STRAFE_LEFT,
+	PLAYER_TURN_BACK,
+	PLAYER_LOOK_UP,
+	PLAYER_LOOK_DOWN,
+}				t_e_player_controller_buttons;
+
+typedef struct s_player
+{
+	t_vec3		pos;
+	t_vec3		velocity;
+	t_vec3		forw;
+    t_vec3      right;
+	double		focal_len;
+	double		cam_hor;
+	double		cam_ver;
+	Uint16		controller[11];
+	void		(*move)(struct s_player *player);
+	void		(*update_velocity)(struct s_player *player, double speed);
+	void		(*rotate)(struct s_player *player, double rotation_angle);
+	void		(*collision)(struct s_player *player, t_map *map);
+	double		rotation_angle;
+	double		speed;
+	double		height;
+    // t_camera    camera;
+}				t_player;
+
 void			ft_draw_player(SDL_Surface *surface, int ox, int oy);
 void			ft_init_player_controller(t_player *player);
-void			ft_player_controller(t_player *player, SDL_Event event);
+void			ft_player_input(t_player *player, SDL_Event event);
 void			ft_player_physics(t_player *player, t_map *map);
 void			ft_create_player(t_player *player, Uint32 x, Uint32 y, t_vec3 look_dir);
-void			ft_player_move(t_player *player, double speed);
+void			ft_player_move(t_player *player);
+void			ft_player_velocity(t_player *player, double speed);
 void			ft_player_rotate(t_player *player, double rotation_angle);
+void			ft_check_player_collision(t_player *player, t_map *map);
 void			putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel);
 Uint32			getpixel(SDL_Surface *surface, int x, int y);
 Uint32			get_pixel32(SDL_Surface *surface, int x, int y);
 void			put_pixel32(SDL_Surface *surface, int x, int y, Uint32 pixel);
-SDL_Window		*ft_sdl_init_create_window(int win_pos_x, int win_pos_y, int win_width, int win_height);
-SDL_Surface		*ft_create_surface(SDL_Window *win, int win_width, int win_height, int bpp);
+void			ft_sdl_init_data(t_sdl_data *sdl_data);
+SDL_Surface		*ft_create_surface(int win_width, int win_height, int bpp);
 int				key_code(SDL_Event	event);
 int				scan_code(SDL_Event	event);
 int				scan_code_up(SDL_Event	event);
 int				scan_code_down(SDL_Event	event);
+int				ft_shift_is_down(void);
 void			ft_print_map(t_map *map, t_player *player);
-void			ft_draw_map(SDL_Surface *surface, t_map *map, t_player *player);
-t_map			*ft_create_map(int width, int height);
+void			ft_draw_mini_map(SDL_Surface *surface, t_map *map, t_player *player);
+void			ft_draw_mini_map_wall_inter(t_ray_hit wall, SDL_Surface *bmp);
+t_map			*ft_create_map(char *file);
 void			ft_destroy_map(t_map *map);
+void			ft_ray_cast_scene(t_player *player, t_map *map, SDL_Surface *bmp);
+int				ft_ray_cast(t_ray *ray, t_vec3 origin, t_vec3 direction, t_map *map);
+void			ft_find_closest_wall(t_ray *ray, t_map *map, t_vec3 forward);
+t_map			*ft_get_map_from_file(char *file);
 
 #endif

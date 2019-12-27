@@ -94,116 +94,47 @@ t_vec3	ft_limit_inter_by_map(t_vec3 position, t_map *map)
 	return ((t_vec3){ -2, -2, -2});
 }
 
-void	ft_find_vertical_intersection(t_ray *ray, t_player *player, t_vec3 mapped_pos, t_map *map)
+void	ft_find_vertical_intersection(t_ray *ray, t_map *map)
 {
-	(void)mapped_pos;
-	ray->dir = ft_vec3_normalize(ft_vec3_sub(mapped_pos, player->pos));
-	// ray->origin = player->pos;
 	double dot = ft_vec3_dot_product(ray->dir, RIGHT);
-	ray->angle = acos(dot);												// positive angle is down (clock-wise)
-	// printf("ray dir %f, %f\n", ray->dir.x, ray->dir.y);
+	double angle = acos(dot);												// positive angle is down (clock-wise)
 
 	double horizontal_edge;
 
 	t_vec3 cross = ft_vec3_cross_product(ray->dir, RIGHT);
 	if (ft_vec3_dot_product(FORW, cross) < 0)
-		ray->angle = -ray->angle;
+		angle = -angle;
 	if ((dot < 0))
-		horizontal_edge =  player->pos.x - (player->pos.x - (TILE_WIDTH * ((int)player->pos.x / (int)TILE_WIDTH)));		// left edge
+		horizontal_edge =  ray->origin.x - (ray->origin.x - (TILE_WIDTH * ((int)ray->origin.x / (int)TILE_WIDTH)));		// left edge
 	else
-	{
-		// horizontal_edge =  player->pos.x - (((double)TILE_WIDTH * (player->pos.x / (double)TILE_WIDTH)));		// left edge
-		// horizontal_edge = player->pos.x + (TILE_WIDTH - ((double)TILE_WIDTH * (player->pos.x / (double)TILE_WIDTH)));	// right edge
-
-		horizontal_edge = player->pos.x + (TILE_WIDTH - (player->pos.x - (TILE_WIDTH * ((int)player->pos.x / (int)TILE_WIDTH))));	// right edge
-	printf("%d | player->pos.x %f | %d | %f\n", ((int)player->pos.x % TILE_WIDTH), player->pos.x, (TILE_WIDTH * ((int)player->pos.x / (int)TILE_WIDTH)), player->pos.x - (TILE_WIDTH * ((int)player->pos.x / (int)TILE_WIDTH)));
-	}
-		// horizontal_edge = player->pos.x + (TILE_WIDTH - (int)player->pos.x % TILE_WIDTH);	// right edge
-	// printf("angle in rad: %f | angle in deg: %f |  tan(ray->angle) %f | horizontal_edge %f\n", ray->angle, ray->angle * 180 / PI , tan(ray->angle), horizontal_edge);
-	// printf("current.x (%f)   |   right_edge (x): (%f)\n", player->pos.x, horizontal_edge);
-	double distance_to_horizontal_edge = horizontal_edge - player->pos.x;
-	// printf("distance_to_horizontal_edge: %f\n", distance_to_horizontal_edge);
-	double distance_from_horizontal_edge_to_vertical_inter = distance_to_horizontal_edge * tan(ray->angle);
-	// printf("distance_from_horizontal_edge_to_vertical_inter: %f\n", fabs(distance_from_horizontal_edge_to_vertical_inter));
-	(void)distance_from_horizontal_edge_to_vertical_inter;
-
-
-
-	ray->first_ver_point = ft_limit_inter_by_map((t_vec3){player->pos.x + distance_to_horizontal_edge, player->pos.y + distance_from_horizontal_edge_to_vertical_inter, 0}, map);
-	// if (ray->first_inter_point.x >= 100 && ray->first_inter_point.x < 110)
-// printf("vertical inter point: (%f, %f)\n", player->pos.x + distance_to_horizontal_edge, player->pos.y + distance_from_horizontal_edge_to_vertical_inter);
-	// printf("ERROR y: %f\n", player->pos.y + distance_from_horizontal_edge_to_vertical_inter);
-	//(t_vec3){player->pos.x + distance_to_horizontal_edge, player->pos.y + distance_from_horizontal_edge_to_vertical_inter, 0};
-	double next_horiz_edge_to_next_vertical_inter = TILE_WIDTH * tan(ray->angle); // steps
-// printf("distance to first VERTICAL inter point:       (%f)\n", ft_vec3_mag(ft_vec3_sub(ray->first_inter_point, player->pos)));//ft_vec3_mag_cmp());
-
+		horizontal_edge = ray->origin.x + (TILE_WIDTH - (ray->origin.x - (TILE_WIDTH * ((int)ray->origin.x / (int)TILE_WIDTH))));	// right edge
+	double distance_to_horizontal_edge = horizontal_edge - ray->origin.x;
+	double distance_from_horizontal_edge_to_vertical_inter = distance_to_horizontal_edge * tan(angle);
+	ray->first_ver_point = ft_limit_inter_by_map((t_vec3){ray->origin.x + distance_to_horizontal_edge, ray->origin.y + distance_from_horizontal_edge_to_vertical_inter, 0}, map);
+	double next_horiz_edge_to_next_vertical_inter = TILE_WIDTH * tan(angle); // steps
 	ray->increments_v.x = dot > 0 ? TILE_WIDTH : -TILE_WIDTH;
 	ray->increments_v.y = dot > 0 ? next_horiz_edge_to_next_vertical_inter : -next_horiz_edge_to_next_vertical_inter;
-
-	// ray->wall_inter = ft_limit_inter_by_map(ft_vec3_add(ray->first_inter_point, ray->increments), map);
-// printf("VERTICAL wall distance ------>:       (%f)\n", ft_vec3_mag(ft_vec3_sub(ray->wall_inter, player->pos)));//ft_vec3_mag_cmp());
-	// if (ray->wall_inter.y >= 100 && ray->wall_inter.y < 110)
-// printf("NEXT vertical inter point:       (%f, %f)\n", ray->wall_inter.x, ray->wall_inter.y);
-	(void)map;
 }
 
-void	ft_find_horizontal_intersection(t_ray *ray, t_player *player, t_vec3 mapped_pos, t_map *map)
+void	ft_find_horizontal_intersection(t_ray *ray, t_map *map)
 {
-	(void)mapped_pos;
-	ray->dir = ft_vec3_normalize(ft_vec3_sub(mapped_pos, player->pos));
-	// t_vec3 origin = player->pos;
 	double dot = ft_vec3_dot_product(ray->dir, DOWN); // positive y (to know which edge to pick)
-	ray->angle = acos(dot);											// positive angle is left (clock-wise)
-	// printf("ray dir %f, %f\n", ray->dir.x, ray->dir.y);
-	// printf("dot %f\n", dot);
-
+	double angle = acos(dot);											// positive angle is left (clock-wise)
 	double vertical_edge;
-
-	// if (ray->angle > (double)1.5708)
-	// 	ray->angle = (double)3.14159 - ray->angle;
 	t_vec3 cross = ft_vec3_cross_product(ray->dir, DOWN);
+
 	if (ft_vec3_dot_product(FORW, cross) > 0)
-		ray->angle = -ray->angle;
-// printf(" angle in deg: %f |  ft_vec3_dot_product(FORW, cross) %f \n", ray->angle * 180 / PI , ft_vec3_dot_product(FORW, cross));
-	// printf("angle in rad: %f | angle in deg: %f \n", ray->angle, ray->angle * 180 / PI);
+		angle = -angle;
 	if ((dot < 0))
-		vertical_edge =  player->pos.y - (player->pos.y - (TILE_HEIGHT * ((int)player->pos.y / (int)TILE_HEIGHT)));		// top edge
+		vertical_edge =  ray->origin.y - (ray->origin.y - (TILE_HEIGHT * ((int)ray->origin.y / (int)TILE_HEIGHT)));		// top edge
 	else
-		vertical_edge = player->pos.y + (TILE_HEIGHT - (player->pos.y - (TILE_HEIGHT * ((int)player->pos.y / (int)TILE_HEIGHT))));	// bottom edge
-		// printf("angle in rad: %f | angle in deg: %f |  tan(ray->angle) %f | vertical_edge %f\n", ray->angle, ray->angle * 180 / PI , tan(ray->angle), vertical_edge);
-	// printf("current.y (%f)   |   bottom_edge (y): (%f)\n", player->pos.y, bottom_edge);
-	double distance_to_vertical_edge = vertical_edge - player->pos.y;
-	// printf("distance_to_vertical_edge: %f\n", distance_to_vertical_edge);
-	double distance_from_vertical_edge_to_horizontal_inter = distance_to_vertical_edge * tan(ray->angle);
-		// printf("distance_from_vertical_edge_to_horizontal_inter: %f\n", distance_from_vertical_edge_to_horizontal_inter);
-// printf("horizontal inter point: (%f, %f)\n", player->pos.x + distance_from_vertical_edge_to_horizontal_inter, player->pos.y + distance_to_vertical_edge);
-	(void)distance_from_vertical_edge_to_horizontal_inter;
-
-
-
-	ray->first_hor_point = ft_limit_inter_by_map((t_vec3){ player->pos.x + distance_from_vertical_edge_to_horizontal_inter, player->pos.y + distance_to_vertical_edge, 0 }, map);
-	double next_edge_to_next_vertical_inter = TILE_HEIGHT * tan(ray->angle); // steps
-	
-	// t_vec3 increments;
+		vertical_edge = ray->origin.y + (TILE_HEIGHT - (ray->origin.y - (TILE_HEIGHT * ((int)ray->origin.y / (int)TILE_HEIGHT))));	// bottom edge
+	double distance_to_vertical_edge = vertical_edge - ray->origin.y;
+	double distance_from_vertical_edge_to_horizontal_inter = distance_to_vertical_edge * tan(angle);
+	ray->first_hor_point = ft_limit_inter_by_map((t_vec3){ ray->origin.x + distance_from_vertical_edge_to_horizontal_inter, ray->origin.y + distance_to_vertical_edge, 0 }, map);
+	double next_edge_to_next_vertical_inter = TILE_HEIGHT * tan(angle); // steps
 	ray->increments_h.x = dot > 0 ? next_edge_to_next_vertical_inter : -next_edge_to_next_vertical_inter; ////// next inter point is weird af
 	ray->increments_h.y = dot > 0 ? TILE_HEIGHT : -TILE_HEIGHT;
-		// printf("ray->increments_h.x: %f\n", ray->increments_h.x);
-	// if (ray->increments_h.x >)
-									// printf("distance to first HORIZONTAL inter point:       (%f)\n", ft_vec3_mag(ft_vec3_sub(first_inter_point, player->pos)));//ft_vec3_mag_cmp());
-	
-	// if (ft_vec3_mag(ft_vec3_sub(ray->first_inter_point, player->pos)) > ft_vec3_mag(ft_vec3_sub(first_inter_point, player->pos)))
-	// {
-	// 	ray->angle = ray->angle;
-	// 	ray->dir = ray->dir;
-	// 	ray->origin = player->pos;
-	// 	ray->first_inter_point = first_inter_point;
-	// 	ray->increments = increments;
-	// }
-
-	// ray->wall_inter = ft_limit_inter_by_map(ft_vec3_add(ray->first_inter_point, ray->increments), map);
-// printf("HORIZONTAL wall distance ------>:       (%f)\n", ft_vec3_mag(ft_vec3_sub(ray->wall_inter, player->pos)));//ft_vec3_mag_cmp());
-// printf("NEXT horizontal edge inter point:       (%f, %f)\n", wall_inter.x, wall_inter.y);
-	(void)map;
 }
 
 t_index get_map_index(t_vec3 position, t_map *map)
@@ -238,59 +169,30 @@ t_tile *get_map_tile_hor(t_index m_index, t_map *map)
 	return (NULL);
 }
 
-t_wall ft_find_closest_wall(int x, t_ray *ray, t_map *map, t_player *player, t_vec3 mapped_pos, SDL_Surface *bmp)
+void ft_find_closest_wall(t_ray *ray, t_map *map, t_vec3 forward)//t_player *player)
 {
 	t_tile *tile = &map->tiles[0][0];
 	t_tile *tile2 = &map->tiles[0][0];
-	// double distance;
-	// double distance2;
 	t_vec3 i = ray->first_hor_point;
 	t_vec3 j = ray->first_ver_point;
-	// printf("i.x: %f, i.y: %f j.x %f j.y %f\n", i.x, i.y, j.x, j.y);
-	// t_vec3 i2;
-	// t_vec3 j2;
-	// int c = 0x0;
-	// int c2 = 0x0;
-	// int draw;
-	// t_inter	hor[3];
-	// t_inter	ver[3];
-	// for (size_t p = 0; p < 3; p++)
-	// {
-	// 	ver[p].distance = -1;
-	// 	hor[p].distance = -1;
-	// }
 	double cos_alpha;
-
 	t_inter	hor;
 	t_inter	ver;
+
 	hor.intersected = 0;
 	ver.intersected = 0;
 	hor.distance = MEGA;
 	ver.distance = MEGA;
-	// int counter_h = 0;
-	// int counter_v = 0;
+	ray->ray_hit.distance_from_origin = MEGA;
 	while ((tile || tile2) && (!hor.intersected || !ver.intersected))
 	{
-		// draw = 0;
-		// distance = MEGA;
-		// distance2 = MEGA;
 		if (!hor.intersected && (tile = get_map_tile_hor(get_map_index(i, map), map)))
 		{
 			if (tile->depth == 1)
 			{
-				cos_alpha = ft_vec3_dot_product(player->forw, ray->dir);
-				// if (x == BMP_WIDTH / 2)
-					// printf("x: %f | y: %f\n", i.x, i.y);
-				hor.distance = ft_vec3_mag(ft_vec3_sub(i, player->pos)) * cos_alpha;
-				// hor[counter_h].distance = distance;
-				// hor[counter_h].point = i;
-				// put_pixel32(surface, i.x, i.y, 0xFFFF0000  + c);
-				// c += 0x5599;
-				// printf("distance to hor %f\n", hor.distance);
-				// printf("tile %d, %d\n", tile->index.x, tile->index.y);
+				cos_alpha = ft_vec3_dot_product(forward, ray->dir);
+				hor.distance = ft_vec3_mag(ft_vec3_sub(i, ray->origin)) * cos_alpha;
 				hor.facing = ((int)(i.y / TILE_HEIGHT) == tile->index.y) ? NORTH : SOUTH;
-				// printf("tile %d, %d | facing %d\n", tile->index.x, tile->index.y, hor.facing);
-				// draw = 1;
 				hor.point = i;
 				hor.intersected = 1;
 				tile = NULL;
@@ -301,66 +203,31 @@ t_wall ft_find_closest_wall(int x, t_ray *ray, t_map *map, t_player *player, t_v
 		{
 			if (tile2->depth == 1)
 			{
-				cos_alpha = ft_vec3_dot_product(player->forw, ray->dir);
-				// if (x == BMP_WIDTH / 2)
-				// 	printf("x: %f | y: %f\n", j.x, j.y);
-				ver.distance = ft_vec3_mag(ft_vec3_sub(j, player->pos))  * cos_alpha;
-				// ver[counter_v].distance = distance2;
-				// ver[counter_v].point = j;
-				// put_pixel32(surface, j.x, j.y, 0xFF00FF00 + c2);
-				// c2 += 0x330099;
-				// printf("distance to ver %f\n", ver.distance);
-				// draw = ((distance2 <= distance) || !tile) ? 2 : 1;
-				// printf("j.x %f, j.y %f\n", j.x, j.y);
-				// printf("tile2 %d, %d\n", tile2->index.x, tile2->index.y);
+				cos_alpha = ft_vec3_dot_product(forward, ray->dir);
+				ver.distance = ft_vec3_mag(ft_vec3_sub(j, ray->origin))  * cos_alpha;
 				ver.facing = ((int)(j.x / TILE_WIDTH) == tile2->index.x) ? WEST : EAST;
-				// printf("tile2 %d, %d | facing %d\n", tile2->index.x, tile2->index.y, ver.facing);
 				ver.point = j;
 				ver.intersected = 1;
 				tile2 = NULL;
 			}
-			// if (tile->depth == 1)
-			// 	put_pixel32(surface, i.x, i.y, 0xFFFF0000);
 			j = ft_vec3_add(j, ray->increments_v);
 		}
 	}
-	t_wall	wall;
-	wall.facing = SKYBOX;
-	// if (x == BMP_WIDTH / 2)
-	// 	printf("ver.distance: %16f, hor.distance: %16f\n", ver.distance, hor.distance);
+	ray->ray_hit.facing = SKYBOX;
 	if (hor.distance < ver.distance)
 	{
-		ray->wall_inter = hor.point;
-		wall.inter_point = hor.point;
-		wall.distance_from_origin = hor.distance;
-		wall.facing = hor.facing;
-		// put_pixel32(bmp, hor.point.x / MINI_MAP_RATIO_WIDTH, hor.point.y / MINI_MAP_RATIO_HEIGHT, 0xFFFF0000);
-		// printf("inter %f, %f\n", wall.inter_point.x, wall.inter_point.y);
+		ray->ray_hit.point = hor.point;
+		ray->ray_hit.distance_from_origin = hor.distance;
+		ray->ray_hit.facing = hor.facing;
+		ray->ray_hit.type = WALL;
 	}
 	else if (ver.distance >= ver.distance && ver.distance != MEGA)
 	{
-		ray->wall_inter = ver.point;
-		wall.inter_point = ver.point;
-		wall.distance_from_origin = ver.distance;
-		wall.facing = ver.facing;
-		// put_pixel32(bmp, ver.point.x / MINI_MAP_RATIO_WIDTH, ver.point.y / MINI_MAP_RATIO_HEIGHT, 0xFF00FF00);
-		// printf("inter %f, %f\n", wall.inter_point.x, wall.inter_point.y);
+		ray->ray_hit.point = ver.point;
+		ray->ray_hit.distance_from_origin = ver.distance;
+		ray->ray_hit.facing = ver.facing;
+		ray->ray_hit.type = WALL;
 	}
-	// for (int c = 0; c < 3; c++)
-	// {
-	// 	if (c < counter_v)
-	// 		printf("distance to hor %f\n", hor[c].distance);
-	// 	if (c < counter_h)
-	// 		printf("distance to ver %f\n", ver[c].distance);
-	// 	printf("-------\n");
-	// }
-	
-		// printf("distance to hor %f distance to ver %f\n", distance, distance2);//ft_vec3_mag(ft_vec3_sub(i, player->pos)), ft_vec3_mag(ft_vec3_sub(j, player->pos)));
-	(void)bmp;
-	(void)mapped_pos;
-	(void)player;
-	(void)x;
-	return (wall);
 }
 
 /*
@@ -368,10 +235,11 @@ t_wall ft_find_closest_wall(int x, t_ray *ray, t_map *map, t_player *player, t_v
 **	returns an array of SDL surfaces whenever called
 */
 
-SDL_Surface **get_all_textures()
+SDL_Surface **get_all_textures(void)
 {
 	static int initialized = 0;
 	static SDL_Surface *game_textures[TEXTURE_NUM];
+	int i;
 
 	if (!initialized)
 	{
@@ -381,36 +249,75 @@ SDL_Surface **get_all_textures()
 		game_textures[3] = IMG_Load("./Textures/WEST.JPG");
 		// IMG_Load("SKY.JPG"),
 		// IMG_Load("GROUND.JPG"),
+		i = -1;
+		while (++i < TEXTURE_NUM)
+			if (!game_textures[i])
+				return (NULL);
 		initialized = 1;
+
 	}
 	return (game_textures);
 }
 
-int get_wall_texture(int x, int y, t_wall wall, SDL_Surface *bmp)
+int get_wall_texture(int y, t_ray_hit wall, SDL_Surface *bmp)
 {	
 	SDL_Surface **textures;
 	int color;
-
 	textures = get_all_textures();
-	// color = getpixel(textures[wall.facing],
-	// 		(int)(((double)x / BMP_WIDTH) * textures[wall.facing]->w),
-	// 		(int)(((double)y / bmp->h) * textures[wall.facing]->h));
-	color = getpixel(textures[wall.facing],
-			(int)(x * textures[wall.facing]->w),
-			(int)(y * textures[wall.facing]->h));
-	//((double)x / BMP_WIDTH)
-	//(double)y / bmp->h
-	//(((int)wall.inter_point.x % 100) / TILE_WIDTH)
-	// printf("color: %X\n", color);
+	int ny = (textures[wall.facing]->h) * (y - (bmp->h / 2 - wall.wall_height / 2)) / wall.wall_height;
+	int nx;
+	if (wall.facing == NORTH || wall.facing == SOUTH)
+	{
+		nx = (textures[wall.facing]->w) * (ceil(wall.wall_height - wall.point.x) - (wall.wall_height - wall.point.x));
+		color = getpixel(textures[wall.facing], nx, (ny));
+	}
+	else if (wall.facing == EAST || wall.facing == WEST)
+	{
+		nx = (textures[wall.facing]->w) * (ceil(wall.wall_height - wall.point.y) - (wall.wall_height - wall.point.y));
+		color = getpixel(textures[wall.facing], nx, (ny));
+	}
 	if (wall.facing == SKYBOX)
 		return (0xFFFFFFFF);
 	return (0xFF000000 + color);
-	(void)x;
-	(void)bmp;
+}
+void ft_draw_walls(int x, t_ray_hit wall, SDL_Surface *bmp, t_player *player)
+{
+	int i;
+	int j;
+	int counter;
+	if (wall.facing == SKYBOX)
+		return ;// draw skybox
+	i = bmp->h / 2 + player->height;
+	j = i + 1;
+	counter = 0;
+	wall.wall_height = (int)(bmp->h / wall.distance_from_origin + 20);
+	while (counter < wall.wall_height / 2)
+	{
+		if (i >= 0)
+		{
+			put_pixel32(bmp, x, i, get_wall_texture(i - player->height, wall, bmp));
+			i--;
+		}
+		if (j + player->height < bmp->h)
+		{
+			put_pixel32(bmp, x, j, get_wall_texture(j - player->height, wall, bmp));
+			j++;
+		}
+		counter++;
+	}
+
 }
 
+int ft_ray_cast(t_ray *ray, t_vec3 origin, t_vec3 direction, t_map *map)
+{
+	ray->dir = direction;
+	ray->origin = origin;
+	ft_find_vertical_intersection(ray, map);
+	ft_find_horizontal_intersection(ray, map);
+	return (1);
+}
 
-void ft_draw_walls(int x, t_wall wall, SDL_Surface *bmp)
+/* void ft_draw_walls(int x, t_ray_hit wall, SDL_Surface *bmp, t_player *player)
 {
 	int i;
 	int j;
@@ -419,9 +326,8 @@ void ft_draw_walls(int x, t_wall wall, SDL_Surface *bmp)
 
 	if (wall.facing == SKYBOX)
 		return ;// draw skybox
-	i = bmp->h / 2;
+	i = bmp->h / 2 + player->height;
 	j = i + 1;
-	// max_pixels = (int)(bmp->h / wall.distance_from_origin);// + 20)
 	counter = 0;
 	wall_height = (int)(bmp->h / wall.distance_from_origin + 20);
 	int txt0;
@@ -431,9 +337,9 @@ void ft_draw_walls(int x, t_wall wall, SDL_Surface *bmp)
 
 	double mapped_x;
 	if (wall.facing == NORTH || wall.facing == SOUTH)
-		mapped_x = (int)wall.inter_point.x % TILE_WIDTH / TILE_WIDTH;
+		mapped_x = (int)wall.point.x % TILE_WIDTH / TILE_WIDTH;
 	else
-		mapped_x = (int)wall.inter_point.y % TILE_HEIGHT / TILE_HEIGHT;
+		mapped_x = (int)wall.point.y % TILE_HEIGHT / TILE_HEIGHT;
 	while (counter < wall_height / 2)
 	{
 		if (i >= 0 && txt0 >= 0)
@@ -449,7 +355,7 @@ void ft_draw_walls(int x, t_wall wall, SDL_Surface *bmp)
 			txt0--;
 			i--;
 		}
-		if (j < bmp->h && txt1 < wall_height)
+		if (j + player->height < bmp->h && txt1 < wall_height)
 		{
 			put_pixel32(bmp, x, j, get_wall_texture(mapped_x, txt1 / wall_height, wall, bmp));
 			txt1++;
@@ -458,57 +364,62 @@ void ft_draw_walls(int x, t_wall wall, SDL_Surface *bmp)
 		counter++;
 	}
 	(void)x;
-}
+}*/
 
-void ft_draw_map_wall_inter(t_wall wall, SDL_Surface *bmp)
-{
-	put_pixel32(bmp, wall.inter_point.x / MINI_MAP_RATIO_WIDTH, wall.inter_point.y / MINI_MAP_RATIO_HEIGHT, 0xFF000000);
-}
-
-void	ft_ray_cast(t_player *player, t_map *map, SDL_Surface *bmp)
+void	ft_ray_cast_scene(t_player *player, t_map *map, SDL_Surface *bmp)
 {
 	int x;
 	t_vec3	mapped_pos;
 	t_ray ray;
-	t_wall wall;
+	t_vec3 direction;
 
 	x = -1;
 	while (++x < BMP_WIDTH)
 	{
 		mapped_pos = ft_map_pixels_to_world(x, player);
-		ft_find_vertical_intersection(&ray, player, mapped_pos, map);
-		ft_find_horizontal_intersection(&ray, player, mapped_pos, map);
+		direction = ft_vec3_normalize(ft_vec3_sub(mapped_pos, player->pos));
+		ft_ray_cast(&ray, player->pos, direction, map);
 
-		wall = ft_find_closest_wall(x, &ray, map, player, mapped_pos, bmp);
-		if (wall.facing != SKYBOX && wall.facing != GROUND)
+		ft_find_closest_wall(&ray, map, player->forw);
+		if (ray.ray_hit.type == WALL)
 		{
-			ft_draw_walls(x, wall, bmp);
-			ft_draw_map_wall_inter(wall, bmp);
+			ft_draw_walls(x, ray.ray_hit, bmp, player);
+			ft_draw_mini_map_wall_inter(ray.ray_hit, bmp);
+		}
+		if (ray.ray_hit.type == PROJECTILE)
+		{
+			
 		}
 	}
 }
 
-void ft_fill_background(SDL_Surface *bmp)
+void ft_fill_background(SDL_Surface *bmp, t_player *player)
 {
+	(void)player;
 	int x;
 	int y;
+	// double perc;
+
 	x = 0;
 	while (x < bmp->w)
 	{
 		y = 0;
-		while (y < bmp->h / 2)
+		while (y < bmp->h / 2 + player->height)
 		{
-			 put_pixel32(bmp, x, y, 0xFF5381FF);
-			 y++;
+			// perc = ((double)y / (double)(bmp->h / 2));
+			// ft_color_rgb_scalar(0xFF5381FF, perc, perc, perc)
+			put_pixel32(bmp, x, y, 0xFF393739);
+			y++;
 		}
 		x++;
 	}
 	x = 0;
 	while (x < bmp->w)
 	{
-		y = bmp->h / 2;
+		y = bmp->h / 2 + player->height;
 		while (y < bmp->h)
 		{
+			// perc = ((double)y / (double)(bmp->h / 2));
 			 put_pixel32(bmp, x, y, 0xFF717171);
 			 y++;
 		}
@@ -523,62 +434,118 @@ void	ft_apply_physics(t_player *player, t_map *map)
 	
 	if (!previous_tick)
 		previous_tick = SDL_GetPerformanceCounter();
-	// delta_time = 0;
-	// delta_time = SDL_GetPerformanceCounter() - previous_tick;
-		// printf("delta_time %llu\n", delta_time);
-		// printf("SDL_GetPerformanceCounter() %llu | previous_tick %llu | sub : %llu \n", SDL_GetPerformanceCounter(), previous_tick, SDL_GetPerformanceCounter() - previous_tick);
-	
-	if (SDL_GetPerformanceCounter() - previous_tick > 1)//(Uint64)SECOND / 30)
+	if (SDL_GetPerformanceCounter() - previous_tick > (Uint64)SECOND / 60)
 	{
 		// printf("PHYSICS\n");
 		ft_player_physics(player, map);
 		previous_tick = SDL_GetPerformanceCounter();
-		// printf("SDL_GetPerformanceFrequency() %llu\n", previous_tick);
-		// printf("%u\n", SDL_GetTicks());
 	}
 	(void)map;
 	(void)player;
 }
 
-void ft_apply_render(t_sdl_data *sdl_data, t_map *map, t_player *player)
+void ft_fps_counter(void)
 {
-	// printf("ft_apply_render\n");
-	ft_fill_background(sdl_data->bmp);
-	ft_draw_map(sdl_data->bmp, map, player);
-	ft_ray_cast(player, map, sdl_data->bmp);
-	int i;
-	i = -1;
-	while(++i < BMP_HEIGHT)
+	static int prev_tick = 0;
+	static int fps = 0;
+
+	fps++;
+	if (!prev_tick)
+		prev_tick = SDL_GetTicks();
+	if (((SDL_GetTicks() - prev_tick)) > 1000)
 	{
-		put_pixel32(sdl_data->bmp, BMP_WIDTH / 2, i, 0xFFFFFFFF);
+		printf("\033[2J\nfps %d\n", fps);
+		prev_tick = SDL_GetTicks();
+		fps = 0;
 	}
-	SDL_BlitSurface(sdl_data->bmp, NULL, sdl_data->display, NULL);
-	// SDL_BlitSurface(textures[3].img, NULL, display, NULL);
-	SDL_UpdateWindowSurface(sdl_data->win);
+}
+
+void	ft_debug_screen_line(SDL_Surface *bmp)
+{
+	int i;
+	
+	i = -1;
+	while(++i < bmp->h)
+	{
+		put_pixel32(bmp, bmp->w / 2, i, 0xFFFFFFFF);
+	}
+}
+
+void ft_clear_screen(t_sdl_data *sdl_data)
+{
 	// Refresh buffers
+	SDL_FillRect(sdl_data->mini_map_bmp, NULL, 0x000000);
 	SDL_FillRect(sdl_data->bmp, NULL, 0x000000);
 	SDL_FillRect(sdl_data->display, NULL, 0x000000);
 }
 
-int	main()
+void	ft_update_screen(t_sdl_data *sdl_data)
+{
+	SDL_BlitSurface(sdl_data->bmp, NULL, sdl_data->display, NULL);
+	SDL_BlitSurface(sdl_data->mini_map_bmp, NULL, sdl_data->display, NULL);
+	SDL_UpdateWindowSurface(sdl_data->win);
+}
+
+void ft_apply_render(t_sdl_data *sdl_data, t_map *map, t_player *player)
+{
+	ft_clear_screen(sdl_data);
+	// ft_fps_counter();
+	ft_fill_background(sdl_data->bmp, player);
+	ft_draw_mini_map(sdl_data->mini_map_bmp, map, player);
+	ft_ray_cast_scene(player, map, sdl_data->bmp);
+	// ft_debug_screen_line(sdl_data->bmp);
+	ft_update_screen(sdl_data);
+}
+
+void	ft_free_textures(void)
+{
+	int k = -1;
+	SDL_Surface **array_to_free;
+	
+	array_to_free = get_all_textures();
+	while (++k < TEXTURE_NUM)
+		if (array_to_free[k])
+			SDL_FreeSurface(array_to_free[k]);
+}
+
+void	ft_free_surface(t_sdl_data *sdl_data)
+{
+	if (sdl_data->bmp)
+		SDL_FreeSurface(sdl_data->bmp);
+	if (sdl_data->mini_map_bmp)
+		SDL_FreeSurface(sdl_data->mini_map_bmp);
+}
+void	ft_graceful_shutdown(t_sdl_data *sdl_data, t_map *map)
+{
+	ft_destroy_map(map);
+	ft_free_textures();
+	ft_free_surface(sdl_data);
+	if (sdl_data->win != NULL)
+		SDL_DestroyWindow(sdl_data->win);
+	// Mix_Quit();
+	IMG_Quit();
+	SDL_Quit();
+	exit(1);
+}
+
+int	main(void)
 {
 	t_map		*map;
 	t_player	player;
-	
-	t_sdl_data sdl_data;
-	sdl_data.quit = false;
-	sdl_data.win = ft_sdl_init_create_window(500, 400, WIN_WIDTH, WIN_HEIGHT);
-	sdl_data.bmp = ft_create_surface(sdl_data.win, BMP_WIDTH, BMP_HEIGHT, BPP);
-	sdl_data.display = SDL_GetWindowSurface(sdl_data.win);
+	t_sdl_data  sdl_data;
+
+	ft_sdl_init_data(&sdl_data);
 	ft_create_player(&player, (int)(TILE_WIDTH + 1) , (int)(TILE_HEIGHT + 1) , (t_vec3){ -1, 0, 0 });
-	map = ft_create_map(11, 7);
+	if (!(map = ft_create_map("level1.map")))
+		return (1);
 	//Initialize PNG loading
-	if(!(IMG_Init( IMG_INIT_JPG ) & IMG_INIT_JPG) || !get_all_textures())
+	if(!(IMG_Init( IMG_INIT_JPG ) & IMG_INIT_JPG))
 	{
-		printf("SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError());
+		perror(IMG_GetError());
 		exit(1);
 	}
-
+	//Init Textures
+	get_all_textures();
 	while (!sdl_data.quit)
 	{
 		while (SDL_PollEvent(&sdl_data.event))
@@ -586,20 +553,25 @@ int	main()
 			// printf("\e[1;1H\e[2J");
 			if (sdl_data.event.type == SDL_QUIT || sdl_data.event.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
 				sdl_data.quit = true;
-			ft_player_controller(&player, sdl_data.event);
-			// printf("playerPos: %f, %f\nscanCode %d | keyCode %d \n", player->pos.x, player->pos.y, scan_code_down(event), key_code(event));
+			ft_player_input(&player, sdl_data.event);
 		}
 		ft_apply_physics(&player, map);
-		// ft_print_map(map, player);
 		ft_apply_render(&sdl_data, map, &player);
-		
 	}
-	ft_destroy_map(map);
-	SDL_FreeSurface(sdl_data.bmp);
-	int k = -1;
-	SDL_Surface **array_to_free = get_all_textures();
-	while (++k < TEXTURE_NUM)
-		SDL_FreeSurface(array_to_free[k]);
-	SDL_DestroyWindow(sdl_data.win);
-	SDL_Quit();
+	printf("EXIT!\n");
+	ft_graceful_shutdown(&sdl_data, map);
 }
+
+		// int k, l;
+		// k = -1;
+		// while (++k < map->height)
+		// {
+		// 	l = -1;
+		// 	while (++l < map->width)
+		// 	{
+		// 		printf("%d (%d, %d)| (%.0f, %.0f)...", (int)map->tiles[k][l].depth, map->tiles[k][l].index.x, map->tiles[k][l].index.y, map->tiles[k][l].width, map->tiles[k][l].height);
+		// 		// printf("%d ", (int)map->tiles[k][l].depth);
+		// 	}
+		// 	printf("\n");
+		// }
+		// exit(1);

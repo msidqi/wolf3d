@@ -22,106 +22,46 @@ void ft_draw_player(SDL_Surface *surface, int ox, int oy)
         }
 }
 
-void	ft_player_controller(t_player *player, SDL_Event event)
+void	ft_player_input(t_player *player, SDL_Event event)
 {
-	Uint32 scan_code_d = scan_code_down(event);
-	Uint32 scan_code_u = scan_code_up(event);
-	
-	if ( event.type == SDL_KEYDOWN && event.key.repeat == 0 )
+	Uint16 activated;
+	Uint32 scan_code;
+
+	scan_code = 0;
+	if (event.type == SDL_KEYDOWN && event.key.repeat == 0)
 	{
-		switch (scan_code_d)
-		{
-			case SDL_SCANCODE_D:
-				player->pos = ft_vec3_add(player->right, player->pos);
-				player->controller[PLAYER_STRAFE_LEFT] = 1;
-				break;
-			case SDL_SCANCODE_A:
-				player->pos = ft_vec3_add(ft_vec3_scalar(player->right, -1), player->pos);
-				player->controller[PLAYER_STRAFE_RIGHT] = 1;
-				break;
-			case SDL_SCANCODE_W:
-				player->controller[PLAYER_FORWARD] = 1;
-				player->pos = ft_vec3_add(player->forw, player->pos);
-				break;
-			case SDL_SCANCODE_S:
-				player->controller[PLAYER_BACKWARDS] = 1;
-				player->pos = ft_vec3_add(ft_vec3_scalar(player->forw, -1), player->pos);
-				break;
-			case SDL_SCANCODE_LEFT:
-				player->controller[PLAYER_TURN_LEFT] = 1;
-				break;
-			case SDL_SCANCODE_RIGHT:
-				player->controller[PLAYER_TURN_RIGHT] = 1;
-				break;
-			case SDL_SCANCODE_UP:
-				player->controller[PLAYER_FORWARD] = 1;
-				break;
-			case SDL_SCANCODE_DOWN:
-				player->controller[PLAYER_BACKWARDS] = 1;
-				break;
-			case SDL_SCANCODE_G:
-				player->forw = (t_vec3){-1, 0, 0};
-				player->right = ft_vec3_normalize(ft_vec3_cross_product(player->forw, FORW));
-				break;
-			case SDL_SCANCODE_J:
-				player->forw = (t_vec3){1, 0, 0};
-				player->right = ft_vec3_normalize(ft_vec3_cross_product(player->forw, FORW));
-				break;
-			case SDL_SCANCODE_Y:
-				player->forw = (t_vec3){0, -1, 0};
-				player->right = ft_vec3_normalize(ft_vec3_cross_product(player->forw, FORW));
-				break;
-			case SDL_SCANCODE_H:
-				player->forw = (t_vec3){0, 1, 0};
-				player->right = ft_vec3_normalize(ft_vec3_cross_product(player->forw, FORW));
-				break;
-			case SDL_SCANCODE_U:
-				player->forw = (t_vec3){1, -1, 0};
-				player->right = ft_vec3_normalize(ft_vec3_cross_product(player->forw, FORW));
-				break;
-			case SDL_SCANCODE_T:
-				player->forw = (t_vec3){-1, -1, 0};
-				player->right = ft_vec3_normalize(ft_vec3_cross_product(player->forw, FORW));
-				break;
-			case SDL_SCANCODE_M:
-				player->forw = (t_vec3){1, 1, 0};
-				player->right = ft_vec3_normalize(ft_vec3_cross_product(player->forw, FORW));
-				break;
-			case SDL_SCANCODE_N:
-				player->forw = (t_vec3){-1, 1, 0};
-				player->right = ft_vec3_normalize(ft_vec3_cross_product(player->forw, FORW));
-				break;
-		}
+		scan_code = scan_code_down(event);
+		activated = 1;
 	}
 	else if (event.type == SDL_KEYUP)
 	{
-		switch (scan_code_u)
-		{
-			case SDL_SCANCODE_D:
-				player->controller[PLAYER_STRAFE_LEFT] = 0;
-				break;
-			case SDL_SCANCODE_A:
-				player->controller[PLAYER_STRAFE_RIGHT] = 0;
-				break;
-			case SDL_SCANCODE_W:
-				player->controller[PLAYER_FORWARD] = 0;
-				break;
-			case SDL_SCANCODE_S:
-				player->controller[PLAYER_BACKWARDS] = 0;
-				break;
-			case SDL_SCANCODE_LEFT:
-				player->controller[PLAYER_TURN_LEFT] = 0;
-				break;
-			case SDL_SCANCODE_RIGHT:
-				player->controller[PLAYER_TURN_RIGHT] = 0;
-				break;
-			case SDL_SCANCODE_UP:
-				player->controller[PLAYER_FORWARD] = 0;
-				break;
-			case SDL_SCANCODE_DOWN:
-				player->controller[PLAYER_BACKWARDS] = 0;
-				break;
-		}
+		scan_code = scan_code_up(event);
+		activated = 0;
+	}
+	switch (scan_code)
+	{
+		case SDL_SCANCODE_A:
+			player->controller[PLAYER_STRAFE_LEFT] = activated; break;
+		case SDL_SCANCODE_D:
+			player->controller[PLAYER_STRAFE_RIGHT] = activated; break;
+		case SDL_SCANCODE_W:
+			player->controller[PLAYER_FORWARD] = activated; break;
+		case SDL_SCANCODE_S:
+			player->controller[PLAYER_BACKWARDS] = activated; break;
+		case SDL_SCANCODE_LEFT:
+			player->controller[PLAYER_TURN_LEFT] = activated; break;
+		case SDL_SCANCODE_RIGHT:
+			player->controller[PLAYER_TURN_RIGHT] = activated; break;
+		case SDL_SCANCODE_UP:
+			player->controller[PLAYER_FORWARD] = activated; break;
+		case SDL_SCANCODE_DOWN:
+			player->controller[PLAYER_BACKWARDS] = activated; break;
+		case SDL_SCANCODE_SPACE:
+			player->controller[PLAYER_TURN_BACK] = activated; break;
+		case SDL_SCANCODE_O:
+			player->controller[PLAYER_LOOK_UP] = activated; break;
+		case SDL_SCANCODE_P:
+			player->controller[PLAYER_LOOK_DOWN] = activated; break;
 	}
 }
 
@@ -149,9 +89,12 @@ void	ft_create_player(t_player *player, Uint32 x, Uint32 y, t_vec3 look_dir)
 	player->cam_ver = 1;
 	ft_init_player_controller(player);
 	player->rotate = &ft_player_rotate;
+	player->update_velocity = &ft_player_velocity;
 	player->move = &ft_player_move;
+	player->collision = &ft_check_player_collision;
 	player->rotation_angle = ROTATION_ANGLE;
 	player->speed = PLAYER_SPEED;
+	player->height = 0;
 }
 
 void ft_player_rotate(t_player *player, double rotation_angle)
@@ -169,6 +112,25 @@ void ft_player_rotate(t_player *player, double rotation_angle)
 		rotation_angle = -ROTATION_ANGLE;
 		rotate = 1;
 	}
+	if (player->controller[PLAYER_LOOK_UP] && player->height > -60)
+	{
+		player->height -= 4;
+	}
+	else if (player->controller[PLAYER_LOOK_DOWN] && player->height < 60)
+	{
+		player->height += 4;
+	}
+	else if (!player->controller[PLAYER_LOOK_DOWN] && !player->controller[PLAYER_LOOK_UP])
+	{
+		if (player->height > 60)
+			player->height = 60;
+		else if (player->height < -60)
+			player->height = -60;
+		if (player->height > 0 )
+			player->height -= 4;
+		if (player->height < 0)
+			player->height += 4;
+	}
 	if (rotate)
 	{
 		player->forw =
@@ -178,42 +140,85 @@ void ft_player_rotate(t_player *player, double rotation_angle)
 	}
 }
 
-void  ft_player_move(t_player *player, double speed)
+static void	ft_limit_velocity(t_vec3 future_pos, t_player *player, t_map *map)
 {
-	int moved;
+	t_ray ray;
+	t_vec3 direction;
 
-	moved = 0;
+	direction = ft_vec3_normalize(ft_vec3_sub(future_pos, player->pos));
+	// printf("direction %f, %f\n", direction.x, direction.y);
+	ft_ray_cast(&ray, player->pos, direction, map);
+	ft_find_closest_wall(&ray, map, direction);
+	// printf("---------> distance_to_wall %f\n", fabs(ray.ray_hit.distance_from_origin));
+	if (ray.ray_hit.type == WALL && fabs(ray.ray_hit.distance_from_origin) <= (ft_vec3_mag(player->velocity)) + 0.3)
+	{
+		if ((ray.ray_hit.facing == NORTH || ray.ray_hit.facing == SOUTH))
+			player->velocity.y = 0.0;
+		else if ((ray.ray_hit.facing == EAST || ray.ray_hit.facing == WEST))
+			player->velocity.x = 0.0;
+	}
+}
+
+void	ft_check_player_collision(t_player *player, t_map *map)
+{
+	t_vec3 future_pos;
+	
+	future_pos = ft_vec3_add(player->pos, player->velocity); // any direction
+	ft_limit_velocity(future_pos, player, map);
+	future_pos = ft_vec3_add(ft_vec3_add(player->pos, player->velocity), ft_vec3_scalar(player->right, 0.5));
+	ft_limit_velocity(future_pos, player, map);
+	future_pos = ft_vec3_add(ft_vec3_add(player->pos, player->velocity), ft_vec3_scalar(player->right, -0.5));
+	ft_limit_velocity(future_pos, player, map);
+}
+
+void  ft_player_move(t_player *player)
+{
+	// player->velocity.x = 0;
+	// player->velocity.x = 1;
+	// printf("%f %f\n", player->velocity.x, player->velocity.y);
+	player->pos = ft_vec3_add(player->pos, player->velocity);
+	(void)player;
+}
+
+void  ft_player_velocity(t_player *player, double speed)
+{
+	// int moved;
+
+	// moved = 0;
+	speed += ft_shift_is_down() * 0.2;
+	player->velocity.x = 0;
+	player->velocity.y = 0;
 	if (player->controller[PLAYER_STRAFE_RIGHT])
 	{
-		player->to_move = ft_vec3_scalar(player->right, (speed / 2));
-		moved = 1;
+		player->velocity = ft_vec3_scalar(player->right, (speed / 2));
+		// moved = 1;
 	}
 	if (player->controller[PLAYER_STRAFE_LEFT])
 	{
-		player->to_move = ft_vec3_scalar(player->right, -(speed / 2));
-		moved = 1;
+		player->velocity = ft_vec3_scalar(player->right, -(speed / 2));
+	// printf("velocity %f, %f\n", player->velocity.x, player->velocity.y);
+		// moved = 1;
 	}
 	if (player->controller[PLAYER_FORWARD])
 	{
-		player->to_move = ft_vec3_scalar(player->forw, speed);
-		moved = 1;
+		player->velocity = ft_vec3_scalar(player->forw, speed);
+	// printf("velocity %f, %f\n", player->velocity.x, player->velocity.y);
+		// moved = 1;
 	}
 	if (player->controller[PLAYER_BACKWARDS])
 	{
-		player->to_move = ft_vec3_scalar(player->forw, -(speed));
-		moved = 1;
+		player->velocity = ft_vec3_scalar(player->forw, -(speed));
+		// moved = 1;
 	}
-	if (moved)
-		player->pos = ft_vec3_add(player->pos, player->to_move);
+	// return (moved);
 	// printf("x: %f y: %f z: %f\n", player->pos.x, player->pos.y, player->pos.z);
 }
 
 void	ft_player_physics(t_player *player, t_map *map)
 {
-	// if (player->move(player, player->speed))
-	// 	player->pos = ft_vec3_add(player->pos, player->to_move);
-	player->move(player, player->speed);
+	player->update_velocity(player, player->speed);
+	player->collision(player, map);
+	player->move(player);
 	player->rotate(player, player->rotation_angle);
-	// ft_apply_player_physics(player);
 	(void)map;
 }

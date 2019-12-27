@@ -29,7 +29,7 @@ size_t		ft_strlen(const char *str)
 
 void	ft_putstr_fd(const char *s, int fd)
 {
-	if (!s)
+	if (!s || fd < 0)
 		return ;
 	write(fd, s, ft_strlen(s));
 }
