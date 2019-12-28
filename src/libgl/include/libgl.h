@@ -254,6 +254,7 @@ t_vec2				ft_vec2_normalize(t_vec2 a);
 t_vec3				ft_vec3_normalize(t_vec3 a);
 double				ft_vec2_dot_product(t_vec2 a, t_vec2 b);
 double				ft_vec3_dot_product(t_vec3 a, t_vec3 b);
+t_vec3				ft_vec3_rotate_z(t_vec3 vector, double rotation_angle);
 t_vec2				ft_vec2_rotate_byangle(t_vec2 a, double angle);
 t_vec2				ft_vec2_rotate_byaxis(t_vec2 a, t_vec2 x_axis,
 		t_vec2 y_axis);

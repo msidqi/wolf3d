@@ -166,13 +166,15 @@ void	ft_check_player_collision(t_player *player, t_map *map)
 {
 	t_vec3 future_pos;
 	
+	// printf("%f %f\n", player->velocity.x, player->velocity.y);
 	future_pos = ft_vec3_add(player->pos, player->velocity); // any direction
 	ft_limit_velocity(future_pos, player, map);
-	future_pos = ft_vec3_add(ft_vec3_add(player->pos, player->velocity), ft_vec3_scalar(player->right, 0.5));
+	future_pos = ft_vec3_add(ft_vec3_add(player->pos, player->velocity), ft_vec3_rotate_z(player->velocity, 0.174533));//ft_vec3_scalar(player->right, 0.5));
 	ft_limit_velocity(future_pos, player, map);
-	future_pos = ft_vec3_add(ft_vec3_add(player->pos, player->velocity), ft_vec3_scalar(player->right, -0.5));
+	future_pos = ft_vec3_add(ft_vec3_add(player->pos, player->velocity), ft_vec3_rotate_z(player->velocity, 0.174533));//ft_vec3_scalar(player->right, -0.5));
 	ft_limit_velocity(future_pos, player, map);
 }
+
 
 void  ft_player_move(t_player *player)
 {
@@ -193,24 +195,24 @@ void  ft_player_velocity(t_player *player, double speed)
 	player->velocity.y = 0;
 	if (player->controller[PLAYER_STRAFE_RIGHT])
 	{
-		player->velocity = ft_vec3_scalar(player->right, (speed / 2));
+		player->velocity = ft_vec3_add(ft_vec3_scalar(player->right, (speed / 2)), player->velocity);
 		// moved = 1;
 	}
 	if (player->controller[PLAYER_STRAFE_LEFT])
 	{
-		player->velocity = ft_vec3_scalar(player->right, -(speed / 2));
+		player->velocity = ft_vec3_add(ft_vec3_scalar(player->right, -(speed / 2)), player->velocity);
 	// printf("velocity %f, %f\n", player->velocity.x, player->velocity.y);
 		// moved = 1;
 	}
 	if (player->controller[PLAYER_FORWARD])
 	{
-		player->velocity = ft_vec3_scalar(player->forw, speed);
+		player->velocity = ft_vec3_add(ft_vec3_scalar(player->forw, speed), player->velocity);
 	// printf("velocity %f, %f\n", player->velocity.x, player->velocity.y);
 		// moved = 1;
 	}
 	if (player->controller[PLAYER_BACKWARDS])
 	{
-		player->velocity = ft_vec3_scalar(player->forw, -(speed));
+		player->velocity = ft_vec3_add(ft_vec3_scalar(player->forw, -(speed)), player->velocity);
 		// moved = 1;
 	}
 	// return (moved);
