@@ -515,14 +515,16 @@ void	ft_free_surface(t_sdl_data *sdl_data)
 	if (sdl_data->mini_map_bmp)
 		SDL_FreeSurface(sdl_data->mini_map_bmp);
 }
-void	ft_graceful_shutdown(t_sdl_data *sdl_data, t_map *map)
+void	ft_graceful_shutdown(t_sdl_data *sdl_data, t_map *map, Mix_Music *backgroundsound)
 {
 	ft_destroy_map(map);
 	ft_free_textures();
 	ft_free_surface(sdl_data);
 	if (sdl_data->win != NULL)
 		SDL_DestroyWindow(sdl_data->win);
-	// Mix_Quit();
+	Mix_FreeMusic(backgroundsound);
+	Mix_CloseAudio();
+	Mix_Quit();
 	IMG_Quit();
 	SDL_Quit();
 	exit(1);
@@ -533,8 +535,28 @@ int	main(void)
 	t_map		*map;
 	t_player	player;
 	t_sdl_data  sdl_data;
+	SDL_Surface *surface;
 
 	ft_sdl_init_data(&sdl_data);
+
+	if(SDL_Init(SDL_INIT_AUDIO) == -1)
+	{
+		printf("SDL_Init: %s\n", SDL_GetError());
+		exit(1);
+	}
+	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024) == -1)
+	{
+		printf("Mix_OpenAudio: %s\n", Mix_GetError());
+		exit(2);
+	}
+	    // Load audio files
+    Mix_Music *backgroundsound = Mix_LoadMUS("1.wav");
+	if (!backgroundsound)
+	{
+    	printf("Mix_LoadMUS(\"music.mp3\"): %s\n", Mix_GetError());
+    // this might be a critical error..
+	}
+
 	ft_create_player(&player, (int)(TILE_WIDTH + 1) , (int)(TILE_HEIGHT + 1) , (t_vec3){ -1, 0, 0 });
 	if (!(map = ft_create_map("level1.map")))
 		return (1);
@@ -544,6 +566,7 @@ int	main(void)
 		perror(IMG_GetError());
 		exit(1);
 	}
+	Mix_PlayMusic(backgroundsound, -1);
 	//Init Textures
 	get_all_textures();
 	while (!sdl_data.quit)
@@ -553,13 +576,16 @@ int	main(void)
 			// printf("\e[1;1H\e[2J");
 			if (sdl_data.event.type == SDL_QUIT || sdl_data.event.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
 				sdl_data.quit = true;
-			ft_player_input(&player, sdl_data.event);
+			surface = ft_create_surface(BMP_WIDTH, BMP_HEIGHT, BPP);
+			SDL_BlitSurface(sdl_data.bmp,NULL,surface,NULL);
+			ft_player_input(&player, sdl_data.event, surface);
 		}
 		ft_apply_physics(&player, map);
 		ft_apply_render(&sdl_data, map, &player);
 	}
 	printf("EXIT!\n");
-	ft_graceful_shutdown(&sdl_data, map);
+	SDL_FreeSurface(surface);
+	ft_graceful_shutdown(&sdl_data, map, backgroundsound);
 }
 
 		// int k, l;

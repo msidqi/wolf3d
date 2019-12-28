@@ -3,18 +3,19 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: msidqi <msidqi@student.42.fr>              +#+  +:+       +#+         #
+#    By: aabouibr <aabouibr@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/11/23 00:08:25 by msidqi            #+#    #+#              #
-#    Updated: 2019/10/11 12:15:24 by msidqi           ###   ########.fr        #
+#    Updated: 2019/12/27 21:38:46 by aabouibr         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME2 = wolf3d
 NAME = callOfDuty_ModernWarfare
 LIBSDL = src/libSDL/libSDL2-2.0.0.dylib
-LIBSDL_ttf = src/libSDL_ttf/libSDL2_ttf-2.0.0.dylib
-LIBSDL_image = src/libSDL_image/libSDL2_image.dylib 
+#LIBSDL_ttf = src/libSDL_ttf/libSDL2_ttf-2.0.0.dylib
+LIBSDL_image = src/libSDL_image/libSDL2_image-2.0.0.dylib
+LIBSDL_mixer = src/libSDL_mixer/libSDL2_mixer-2.0.0.dylib
 LIBGL_PATH = src/libgl/
 LIBGLL = $(LIBGL_PATH)src/libgl.a
 LIBFT_PATH = libft/
@@ -38,7 +39,7 @@ $(LIBGLL) :
 $(LIBFTL) :
 	make -C $(LIBFT_PATH)
 $(NAME) : main.c $(WRAP_SRC) $(LIBGLL) $(LIBFTL) $(WOLF_H)
-	$(CC) -o $@ $< $(WRAP_SRC) -I$(INCLUDE) $(LIBSDL) $(LIBSDL_ttf) $(LIBSDL_image) $(LIBGLL) $(LIBFTL)
+	$(CC) -o $@ $< $(WRAP_SRC) -I$(INCLUDE) $(LIBSDL) $(LIBSDL_mixer) $(LIBSDL_image) $(LIBGLL) $(LIBFTL)
 
 clean :
 	make fclean -C $(LIBGL_PATH)

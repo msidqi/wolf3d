@@ -5,7 +5,7 @@
 # include "SDL2/SDL_image.h"
 # include "SDL2/SDL_ttf.h"
 # include "SDL2/SDL_timer.h"
-# include "SDL2/SDL_timer.h"
+# include "SDL2/SDL_mixer.h"
 # include <stdio.h>
 # include <stdlib.h>
 # include <limits.h>
@@ -169,9 +169,10 @@ typedef struct s_player
     // t_camera    camera;
 }				t_player;
 
+void			*ft_save_ppm_pixels(void *surface);
 void			ft_draw_player(SDL_Surface *surface, int ox, int oy);
 void			ft_init_player_controller(t_player *player);
-void			ft_player_input(t_player *player, SDL_Event event);
+void			ft_player_input(t_player *player, SDL_Event event, SDL_Surface *surface);
 void			ft_player_physics(t_player *player, t_map *map);
 void			ft_create_player(t_player *player, Uint32 x, Uint32 y, t_vec3 look_dir);
 void			ft_player_move(t_player *player);

@@ -22,10 +22,11 @@ void ft_draw_player(SDL_Surface *surface, int ox, int oy)
         }
 }
 
-void	ft_player_input(t_player *player, SDL_Event event)
+void	ft_player_input(t_player *player, SDL_Event event, SDL_Surface *surface)
 {
-	Uint16 activated;
-	Uint32 scan_code;
+	Uint16		activated;
+	Uint32		scan_code;
+	pthread_t	thread_id;
 
 	scan_code = 0;
 	if (event.type == SDL_KEYDOWN && event.key.repeat == 0)
@@ -62,6 +63,8 @@ void	ft_player_input(t_player *player, SDL_Event event)
 			player->controller[PLAYER_LOOK_UP] = activated; break;
 		case SDL_SCANCODE_P:
 			player->controller[PLAYER_LOOK_DOWN] = activated; break;
+		case SDL_SCANCODE_T:
+			pthread_create(&thread_id, NULL, &ft_save_ppm_pixels, (void *)surface);
 	}
 }
 
