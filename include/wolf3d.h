@@ -23,9 +23,9 @@
 # define RIGHT (t_vec3){1, 0, 0}
 # define FORW (t_vec3){0, 0, -1}
 # define BACK (t_vec3){0, 0, 1}
-# define TILE_WIDTH 3
-# define TILE_HEIGHT 3
-# define TILE_DEPTH 3
+# define TILE_WIDTH 1
+# define TILE_HEIGHT 1
+# define TILE_DEPTH 1
 # define MINI_MAP_TILE_WIDTH 25
 # define MINI_MAP_TILE_HEIGHT 25
 # define MINI_MAP_RATIO_WIDTH ((double)TILE_WIDTH / (double)MINI_MAP_TILE_WIDTH)
@@ -37,7 +37,7 @@
 # define SURFACE_H_IS_ODD ((BMP_HEIGHT % 2 == 0) ? 0 : 1)
 # define TEXTURE_NUM 4
 # define ROTATION_ANGLE 0.0372665
-# define PLAYER_SPEED 0.2
+# define PLAYER_SPEED 0.1
 # define SECOND 1000000000
 // # define COS_ROTATION_ANGLE 0.99619469483
 // # define COS_N_ROTATION_ANGLE 0.99619469483
@@ -195,9 +195,10 @@ void			ft_draw_mini_map(SDL_Surface *surface, t_map *map, t_player *player);
 void			ft_draw_mini_map_wall_inter(t_ray_hit wall, SDL_Surface *bmp);
 t_map			*ft_create_map(char *file);
 void			ft_destroy_map(t_map *map);
-void			ft_ray_cast_scene(t_player *player, t_map *map, SDL_Surface *bmp);
+void			ft_ray_cast_scene(t_player *player, t_map *map, t_sdl_data *sdl_data);
 int				ft_ray_cast(t_ray *ray, t_vec3 origin, t_vec3 direction, t_map *map);
 void			ft_find_closest_wall(t_ray *ray, t_map *map, t_vec3 forward);
-t_map			*ft_get_map_from_file(char *file);
+t_map			*ft_get_map_from_file(int fd);
+void			ft_put_error(char *traceback);
 
 #endif

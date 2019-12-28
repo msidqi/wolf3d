@@ -96,102 +96,40 @@ void	ft_destroy_map(t_map *map)
 	int i;
 
 	i = -1;
+	if (map != NULL)
+		return ;
 	while (++i < map->height)
 	{
-		free(map->tiles[i]);
-		map->tiles[i] = NULL;
+		if (map->tiles[i] != NULL)
+			ft_memdel((void **)&(map->tiles[i]));
 	}
-	free(map->tiles);
-	map->tiles = NULL;
-	free(map);
-	map = NULL;
+	if (map->tiles)
+		ft_memdel((void **)&map->tiles);
+	ft_memdel((void **)&map);
 }
 
 t_map	*ft_create_map(char *file)
 {
 	t_map *map;
-	// int i;
-	// int j;
+	int     fd;
 
-	if (!(map = ft_get_map_from_file(file)))
+	if ((fd = open(file, O_RDONLY)) == -1)
+	{
+		ft_put_error("ft_read_map_file");
+		return (NULL);
+	}
+	if (!(map = ft_get_map_from_file(fd)))
 		return (NULL);
 	return (map);
-	// exit(1);
-	// if (!(map->tiles = (t_tile **)malloc(sizeof(t_tile *) * height)))
-	// {
-	// 	free(map);
-	// 	return (NULL);
-	// }
-	// map->height = height;
-	// map->width = width;
-	// i = -1;
-	// while (++i < height)
-	// {
-	// 	j = -1;
-	// 	map->tiles[i] = (t_tile *)malloc(sizeof(t_tile) * width);
-	// 	while (++j < width)
-	// 	{
-	// 		map->tiles[i][j].width = TILE_WIDTH;
-	// 		map->tiles[i][j].height = TILE_HEIGHT;
-	// 		map->tiles[i][j].index.x = j;
-	// 		map->tiles[i][j].index.y = i;
-	// 		// if (i == 0 || j == 0 || i == height - 1)
-	// 		// 	map->tiles[i][j].depth = 1;
-	// 		// else
-	// 		// 	map->tiles[i][j].depth = 0;
-	// 		// map->tiles[i][j].pos = (t_vec3int){ i, j, 0 };
-	// 	}
-	// }
-	// map->tiles[1][4].depth = 1;
-	// map->tiles[3][3].depth = 1;
-	// map->tiles[2][3].depth = 1;
-	// map->tiles[0][0].depth = 1;
-	// return (map);
 }
-
-// t_map	*ft_create_map(int width, int height)
-// {
-// 	t_map *map;
-// 	int i;
-// 	int j;
-
-// 	if (height < 4 || width < 4)
-// 		return (NULL);
-// 	if (!(map = (t_map *)malloc(sizeof(t_map))))
-// 		return (NULL);
-// 	if (!(map->tiles = (t_tile **)malloc(sizeof(t_tile *) * height)))
-// 	{
-// 		free(map);
-// 		return (NULL);
-// 	}
-// 	map->height = height;
-// 	map->width = width;
-// 	i = -1;
-// 	while (++i < height)
-// 	{
-// 		j = -1;
-// 		map->tiles[i] = (t_tile *)malloc(sizeof(t_tile) * width);
-// 		while (++j < width)
-// 		{
-// 			map->tiles[i][j].width = TILE_WIDTH;
-// 			map->tiles[i][j].height = TILE_HEIGHT;
-// 			map->tiles[i][j].index.x = j;
-// 			map->tiles[i][j].index.y = i;
-// 			// if (i == 0 || j == 0 || i == height - 1)
-// 			// 	map->tiles[i][j].depth = 1;
-// 			// else
-// 			// 	map->tiles[i][j].depth = 0;
-// 			// map->tiles[i][j].pos = (t_vec3int){ i, j, 0 };
-// 		}
-// 	}
-// 	map->tiles[1][4].depth = 1;
-// 	map->tiles[3][3].depth = 1;
-// 	map->tiles[2][3].depth = 1;
-// 	map->tiles[0][0].depth = 1;
-// 	return (map);
-// }
 
 void ft_draw_mini_map_wall_inter(t_ray_hit wall, SDL_Surface *bmp)
 {
-	put_pixel32(bmp, wall.point.x / MINI_MAP_RATIO_WIDTH, wall.point.y / MINI_MAP_RATIO_HEIGHT, 0xFFFFFFFF);
+	int x;
+	int y;
+
+	x = wall.point.x / MINI_MAP_RATIO_WIDTH;
+	y = wall.point.y / MINI_MAP_RATIO_HEIGHT;
+	if (x >= 0 && y >= 0 && x < bmp->w && y < bmp->h)
+		put_pixel32(bmp, x, y, 0xFFFFFFFF);
 }

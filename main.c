@@ -280,6 +280,7 @@ int get_wall_texture(int y, t_ray_hit wall, SDL_Surface *bmp)
 		return (0xFFFFFFFF);
 	return (0xFF000000 + color);
 }
+
 void ft_draw_walls(int x, t_ray_hit wall, SDL_Surface *bmp, t_player *player)
 {
 	int i;
@@ -290,7 +291,7 @@ void ft_draw_walls(int x, t_ray_hit wall, SDL_Surface *bmp, t_player *player)
 	i = bmp->h / 2 + player->height;
 	j = i + 1;
 	counter = 0;
-	wall.wall_height = (int)(bmp->h / wall.distance_from_origin + 20);
+	wall.wall_height = (int)(bmp->h / wall.distance_from_origin);
 	while (counter < wall.wall_height / 2)
 	{
 		if (i >= 0)
@@ -298,14 +299,13 @@ void ft_draw_walls(int x, t_ray_hit wall, SDL_Surface *bmp, t_player *player)
 			put_pixel32(bmp, x, i, get_wall_texture(i - player->height, wall, bmp));
 			i--;
 		}
-		if (j + player->height < bmp->h)
+		if (j < bmp->h)
 		{
 			put_pixel32(bmp, x, j, get_wall_texture(j - player->height, wall, bmp));
 			j++;
 		}
 		counter++;
 	}
-
 }
 
 int ft_ray_cast(t_ray *ray, t_vec3 origin, t_vec3 direction, t_map *map)
@@ -366,7 +366,7 @@ int ft_ray_cast(t_ray *ray, t_vec3 origin, t_vec3 direction, t_map *map)
 	(void)x;
 }*/
 
-void	ft_ray_cast_scene(t_player *player, t_map *map, SDL_Surface *bmp)
+void	ft_ray_cast_scene(t_player *player, t_map *map, t_sdl_data *sdl_data)
 {
 	int x;
 	t_vec3	mapped_pos;
@@ -383,8 +383,8 @@ void	ft_ray_cast_scene(t_player *player, t_map *map, SDL_Surface *bmp)
 		ft_find_closest_wall(&ray, map, player->forw);
 		if (ray.ray_hit.type == WALL)
 		{
-			ft_draw_walls(x, ray.ray_hit, bmp, player);
-			ft_draw_mini_map_wall_inter(ray.ray_hit, bmp);
+			ft_draw_walls(x, ray.ray_hit, sdl_data->bmp, player);
+			ft_draw_mini_map_wall_inter(ray.ray_hit, sdl_data->mini_map_bmp);
 		}
 		if (ray.ray_hit.type == PROJECTILE)
 		{
@@ -492,7 +492,7 @@ void ft_apply_render(t_sdl_data *sdl_data, t_map *map, t_player *player)
 	// ft_fps_counter();
 	ft_fill_background(sdl_data->bmp, player);
 	ft_draw_mini_map(sdl_data->mini_map_bmp, map, player);
-	ft_ray_cast_scene(player, map, sdl_data->bmp);
+	ft_ray_cast_scene(player, map, sdl_data);
 	// ft_debug_screen_line(sdl_data->bmp);
 	ft_update_screen(sdl_data);
 }
@@ -527,7 +527,6 @@ void	ft_graceful_shutdown(t_sdl_data *sdl_data, t_map *map, Mix_Music *backgroun
 	Mix_Quit();
 	IMG_Quit();
 	SDL_Quit();
-	exit(1);
 }
 
 int	main(void)
@@ -535,7 +534,6 @@ int	main(void)
 	t_map		*map;
 	t_player	player;
 	t_sdl_data  sdl_data;
-	SDL_Surface *surface;
 
 	ft_sdl_init_data(&sdl_data);
 
@@ -576,15 +574,12 @@ int	main(void)
 			// printf("\e[1;1H\e[2J");
 			if (sdl_data.event.type == SDL_QUIT || sdl_data.event.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
 				sdl_data.quit = true;
-			surface = ft_create_surface(BMP_WIDTH, BMP_HEIGHT, BPP);
-			SDL_BlitSurface(sdl_data.bmp,NULL,surface,NULL);
-			ft_player_input(&player, sdl_data.event, surface);
+			ft_player_input(&player, sdl_data.event, sdl_data.bmp);
 		}
 		ft_apply_physics(&player, map);
 		ft_apply_render(&sdl_data, map, &player);
 	}
 	printf("EXIT!\n");
-	SDL_FreeSurface(surface);
 	ft_graceful_shutdown(&sdl_data, map, backgroundsound);
 }
 

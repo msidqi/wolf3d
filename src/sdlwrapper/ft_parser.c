@@ -100,16 +100,10 @@ int		ft_fill_map_tiles(int fd, t_map *map)
 	return (1);
 }
 
-t_map	*ft_get_map_from_file(char *file)
+t_map	*ft_get_map_from_file(int fd)
 {
-	int     fd;
 	t_map *map;
-
-	if ((fd = open(file, O_RDONLY)) == -1)
-	{
-		ft_put_error("ft_read_map_file");
-		return (NULL);
-	}
+	
 	if (!(map = (t_map *)malloc(sizeof(t_map))))
 		return (NULL);
 	if (!ft_read_map_size(fd, map) || map->height < 4 || map->width < 4)

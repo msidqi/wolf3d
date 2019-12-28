@@ -52,16 +52,17 @@ static void             ft_save_screenshot(SDL_Surface *surface, int *var)
     ft_putchar_fd('\n', var[0]);
 }
 
-void                    *ft_save_ppm_pixels(void *surface)
+void                    *ft_save_ppm_pixels(void *bmp)
 {
     int	var[4];
-    SDL_Surface *pixels;
+    SDL_Surface *surface;
 
-    pixels = (SDL_Surface *)surface;
+    surface = ft_create_surface(BMP_WIDTH, BMP_HEIGHT, BPP);
+    SDL_BlitSurface(bmp,NULL,surface,NULL);
     if (!(var[0] = open("screenshot.ppm", O_RDWR | O_CREAT, 0777)))
 		pthread_exit(NULL);
 	ft_ppm_format(var[0]);
-	ft_save_screenshot(pixels, var);
+	ft_save_screenshot(surface, var);
 	ft_putstr_fd("Screenshot has been saved in the root of the project\n", 1);
     SDL_FreeSurface(surface);
     pthread_exit(NULL);

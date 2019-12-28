@@ -3,23 +3,24 @@
 
 void ft_draw_player(SDL_Surface *surface, int ox, int oy)
 {
-        int r;
-        int x;
-        int y;
-        int h;
-        r = 4;
-        x = -r;
-        while (x < r)
-        {
-                h = sqrt(r * r - x * x);
-                y = -h;
-                while (y < h)
-                {
-                        put_pixel32(surface, x + ox, y + oy, 0x99FF0000);
-                        y++;
-                }
-                x++;
-        }
+	int r;
+	int x;
+	int y;
+	int h;
+
+	r = 4;
+	x = -r;
+	while (x < r)
+	{
+			h = sqrt(r * r - x * x);
+			y = -h;
+			while (y < h)
+			{
+					put_pixel32(surface, x + ox, y + oy, 0x99FF0000);
+					y++;
+			}
+			x++;
+	}
 }
 
 void	ft_player_input(t_player *player, SDL_Event event, SDL_Surface *surface)
@@ -63,9 +64,9 @@ void	ft_player_input(t_player *player, SDL_Event event, SDL_Surface *surface)
 			player->controller[PLAYER_LOOK_UP] = activated; break;
 		case SDL_SCANCODE_P:
 			player->controller[PLAYER_LOOK_DOWN] = activated; break;
-		case SDL_SCANCODE_T:
-			pthread_create(&thread_id, NULL, &ft_save_ppm_pixels, (void *)surface);
 	}
+	if (scan_code == SDL_SCANCODE_T && event.type == SDL_KEYUP)
+		pthread_create(&thread_id, NULL, &ft_save_ppm_pixels, (void *)surface);
 }
 
 void ft_init_player_controller(t_player *player)
@@ -178,45 +179,23 @@ void	ft_check_player_collision(t_player *player, t_map *map)
 
 void  ft_player_move(t_player *player)
 {
-	// player->velocity.x = 0;
-	// player->velocity.x = 1;
-	// printf("%f %f\n", player->velocity.x, player->velocity.y);
 	player->pos = ft_vec3_add(player->pos, player->velocity);
 	(void)player;
 }
 
 void  ft_player_velocity(t_player *player, double speed)
 {
-	// int moved;
-
-	// moved = 0;
-	speed += ft_shift_is_down() * 0.2;
+	speed += ft_shift_is_down() * 0.1;
 	player->velocity.x = 0;
 	player->velocity.y = 0;
 	if (player->controller[PLAYER_STRAFE_RIGHT])
-	{
 		player->velocity = ft_vec3_add(ft_vec3_scalar(player->right, (speed / 2)), player->velocity);
-		// moved = 1;
-	}
 	if (player->controller[PLAYER_STRAFE_LEFT])
-	{
 		player->velocity = ft_vec3_add(ft_vec3_scalar(player->right, -(speed / 2)), player->velocity);
-	// printf("velocity %f, %f\n", player->velocity.x, player->velocity.y);
-		// moved = 1;
-	}
 	if (player->controller[PLAYER_FORWARD])
-	{
 		player->velocity = ft_vec3_add(ft_vec3_scalar(player->forw, speed), player->velocity);
-	// printf("velocity %f, %f\n", player->velocity.x, player->velocity.y);
-		// moved = 1;
-	}
 	if (player->controller[PLAYER_BACKWARDS])
-	{
 		player->velocity = ft_vec3_add(ft_vec3_scalar(player->forw, -(speed)), player->velocity);
-		// moved = 1;
-	}
-	// return (moved);
-	// printf("x: %f y: %f z: %f\n", player->pos.x, player->pos.y, player->pos.z);
 }
 
 void	ft_player_physics(t_player *player, t_map *map)
