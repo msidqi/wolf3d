@@ -534,9 +534,38 @@ int	main(void)
 	t_map		*map;
 	t_player	player;
 	t_sdl_data  sdl_data;
+	int			flag;
+	int			flag_menu;
+	SDL_Surface *menu[3];
+
+	flag = 0;
+	flag_menu = 0;
+    menu[0] = ft_create_surface(BMP_WIDTH, BMP_HEIGHT, BPP);
+	menu[0] = SDL_LoadBMP("image.bmp");
+	menu[1] = ft_create_surface(BMP_WIDTH, BMP_HEIGHT, BPP);
+	menu[1] = SDL_LoadBMP("options.bmp");
+
+	if (TTF_Init() == -1) 
+	{
+		printf("TTF_Init: %s\n", TTF_GetError());
+		exit(2);
+	}
+	TTF_Font *font;
+	font = TTF_OpenFont("font/destroy.ttf", 45);
+	if(!font)
+		printf("TTF_OpenFont: %s\n", TTF_GetError());
+	//TTF_SetFontStyle(font, TTF_STYLE_BOLD|TTF_STYLE_ITALIC); font style
+	SDL_Color selcted_color={255,50,0,255};
+	SDL_Color main_color={255,144,0,255};
+	SDL_Surface *start;
+	SDL_Surface *options;
+	SDL_Surface *quit;
+
+	SDL_Rect text_pos;
+	text_pos.h = 100;
+	text_pos.w = 100;
 
 	ft_sdl_init_data(&sdl_data);
-
 	if(SDL_Init(SDL_INIT_AUDIO) == -1)
 	{
 		printf("SDL_Init: %s\n", SDL_GetError());
@@ -575,12 +604,134 @@ int	main(void)
 			if (sdl_data.event.type == SDL_QUIT || sdl_data.event.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
 				sdl_data.quit = true;
 			ft_player_input(&player, sdl_data.event, sdl_data.bmp);
+			if (sdl_data.event.key.keysym.scancode == SDL_SCANCODE_KP_ENTER)
+			{
+				if (flag == 0 && flag_menu == 0)
+				{
+					flag_menu = 1;
+					flag = 10;
+				}
+				if (flag == 2 && flag_menu == 0)
+				{
+					flag_menu = 2;
+					flag = 10;
+				}
+				if (flag == 4 && flag_menu == 0)
+				{
+					flag_menu = 3;
+					flag = 10;
+				}
+			}
+			if (sdl_data.event.key.keysym.scancode == SDL_SCANCODE_BACKSPACE)
+			{
+				flag_menu = 0;
+				flag = 0;
+			}
+			if (sdl_data.event.key.keysym.scancode == 96)
+			{
+				if (flag_menu == 0)
+				{
+					flag--;
+					if (flag < 0 && flag != -1)
+						flag = 0;
+				}
+			}
+			if (sdl_data.event.key.keysym.scancode == 93)
+			{
+				if (flag_menu == 0)
+				{
+					flag++;
+					if (flag > 4)
+						flag = 4;
+				}
+			}	
+		}
+		if (flag == 0)
+		{
+			text_pos.x = 645;
+			text_pos.y = 178;
+			SDL_BlitSurface(menu[0], NULL, sdl_data.display, NULL);
+			start = TTF_RenderText_Solid(font,"START",selcted_color);
+			options = TTF_RenderText_Solid(font,"OPTIONS",main_color);
+			quit = TTF_RenderText_Solid(font,"QUIT",main_color);
+			SDL_BlitSurface(start,NULL,sdl_data.display,&text_pos);
+			text_pos.y += 100;
+			text_pos.x -= 25;
+			SDL_BlitSurface(options,NULL,sdl_data.display,&text_pos);
+			text_pos.y += 100;
+			text_pos.x += 55;
+			SDL_BlitSurface(quit,NULL,sdl_data.display,&text_pos);
+			SDL_FreeSurface(start);
+			SDL_FreeSurface(options);
+			SDL_FreeSurface(quit);
+			SDL_UpdateWindowSurface(sdl_data.win);
+		}
+		else if (flag == 2)
+		{
+			text_pos.x = 645;
+			text_pos.y = 178;
+			SDL_BlitSurface(menu[0], NULL, sdl_data.display, NULL);
+			start = TTF_RenderText_Solid(font,"START",main_color);
+			options = TTF_RenderText_Solid(font,"OPTIONS",selcted_color);
+			quit = TTF_RenderText_Solid(font,"QUIT",main_color);
+			SDL_BlitSurface(start,NULL,sdl_data.display,&text_pos);
+			text_pos.y += 100;
+			text_pos.x -= 25;
+			SDL_BlitSurface(options,NULL,sdl_data.display,&text_pos);
+			text_pos.y += 100;
+			text_pos.x += 55;
+			SDL_BlitSurface(quit,NULL,sdl_data.display,&text_pos);
+			SDL_FreeSurface(start);
+			SDL_FreeSurface(options);
+			SDL_FreeSurface(quit);
+			SDL_UpdateWindowSurface(sdl_data.win);
+		}
+		else if (flag == 4)
+		{
+			text_pos.x = 645;
+			text_pos.y = 178;
+			SDL_BlitSurface(menu[0], NULL, sdl_data.display, NULL);
+			start = TTF_RenderText_Solid(font,"START",main_color);
+			options = TTF_RenderText_Solid(font,"OPTIONS",main_color);
+			quit = TTF_RenderText_Solid(font,"QUIT",selcted_color);
+			SDL_BlitSurface(start,NULL,sdl_data.display,&text_pos);
+			text_pos.y += 100;
+			text_pos.x -= 25;
+			SDL_BlitSurface(options,NULL,sdl_data.display,&text_pos);
+			text_pos.y += 100;
+			text_pos.x += 55;
+			SDL_BlitSurface(quit,NULL,sdl_data.display,&text_pos);
+			SDL_FreeSurface(start);
+			SDL_FreeSurface(options);
+			SDL_FreeSurface(quit);
+			SDL_UpdateWindowSurface(sdl_data.win);
+		}
+		if (flag_menu == 1)
+			ft_apply_render(&sdl_data, map, &player);
+		if (flag_menu == 2)
+		{
+			SDL_BlitSurface(menu[1],NULL,sdl_data.display,NULL);
+			SDL_UpdateWindowSurface(sdl_data.win);
 		}
 		ft_apply_physics(&player, map);
-		ft_apply_render(&sdl_data, map, &player);
+		if (flag_menu == 3)
+		{
+			flag_menu = -1;
+			sdl_data.quit = true;
+			SDL_FreeSurface(menu[0]);
+			SDL_FreeSurface(menu[1]);
+			TTF_CloseFont(font);
+			ft_graceful_shutdown(&sdl_data, map, backgroundsound);
+		}
+			//printf("flag = %d\n", flag);
 	}
-	printf("EXIT!\n");
-	ft_graceful_shutdown(&sdl_data, map, backgroundsound);
+	if (flag_menu != -1)
+	{
+		TTF_CloseFont(font);
+		SDL_FreeSurface(menu[0]);
+		SDL_FreeSurface(menu[1]);
+		ft_graceful_shutdown(&sdl_data, map, backgroundsound);
+	}
 }
 
 		// int k, l;
