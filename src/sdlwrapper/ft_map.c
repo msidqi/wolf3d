@@ -108,7 +108,7 @@ void	ft_destroy_map(t_map *map)
 	ft_memdel((void **)&map);
 }
 
-t_map	*ft_create_map(char *file)
+t_map	*ft_create_map(char *file, t_player *player)
 {
 	t_map *map;
 	int     fd;
@@ -118,7 +118,7 @@ t_map	*ft_create_map(char *file)
 		ft_put_error("ft_read_map_file");
 		return (NULL);
 	}
-	if (!(map = ft_get_map_from_file(fd)))
+	if (!(map = ft_get_map_from_file(fd, player)))
 		return (NULL);
 	return (map);
 }

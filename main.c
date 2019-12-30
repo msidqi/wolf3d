@@ -333,16 +333,11 @@ void	ft_ray_cast_scene(t_player *player, t_map *map, t_sdl_data *sdl_data)
 		mapped_pos = ft_map_pixels_to_world(x, player);
 		direction = ft_vec3_normalize(ft_vec3_sub(mapped_pos, player->pos));
 		ft_ray_cast(&ray, player->pos, direction, map);
-
 		ft_find_closest_wall(&ray, map, player->forw);
 		if (ray.ray_hit.type == WALL)
 		{
 			ft_draw_walls(x, ray.ray_hit, sdl_data->bmp, player);
 			ft_draw_mini_map_wall_inter(ray.ray_hit, sdl_data->mini_map_bmp);
-		}
-		if (ray.ray_hit.type == PROJECTILE)
-		{
-			
 		}
 	}
 }
@@ -356,7 +351,7 @@ int get_sky_texture(int x, int y, SDL_Surface *bmp)
 			// printf("mapped x: %d | mapped y: %d\n", (int)(((double)x / bmp->w) * sky->w), (int)(((double)y / bmp->w) * sky->h));
 	color = getpixel(sky,
 	(int)(((double)x / bmp->w) * sky->w)
-	, (int)(((double)y / bmp->h + 0.5) * sky->h));
+	, (int)(((double)y / bmp->h + 0.3) * sky->h));
 	return (0xFF000000 + color);
 }
 
@@ -457,7 +452,7 @@ void	ft_update_screen(t_sdl_data *sdl_data)
 void ft_apply_render(t_sdl_data *sdl_data, t_map *map, t_player *player)
 {
 	ft_clear_screen(sdl_data);
-	// ft_fps_counter();
+	ft_fps_counter();
 	ft_fill_background(sdl_data->bmp, player);
 	ft_draw_mini_map(sdl_data->mini_map_bmp, map, player);
 	ft_ray_cast_scene(player, map, sdl_data);
@@ -495,6 +490,7 @@ void	ft_graceful_shutdown(t_sdl_data *sdl_data, t_map *map, Mix_Music *backgroun
 	Mix_CloseAudio();
 	Mix_Quit();
 	IMG_Quit();
+	TTF_Quit();
 	SDL_Quit();
 }
 
@@ -522,7 +518,10 @@ int	main(void)
 	TTF_Font *font;
 	font = TTF_OpenFont("font/destroy.ttf", 45);
 	if(!font)
+	{
 		printf("TTF_OpenFont: %s\n", TTF_GetError());
+		exit(2);
+	}
 	//TTF_SetFontStyle(font, TTF_STYLE_BOLD|TTF_STYLE_ITALIC); font style
 	SDL_Color selcted_color={255,50,0,255};
 	SDL_Color main_color={255,144,0,255};
@@ -552,9 +551,9 @@ int	main(void)
     	printf("Mix_LoadMUS(\"music.mp3\"): %s\n", Mix_GetError());
     // this might be a critical error..
 	}
-
-	ft_create_player(&player, (int)(TILE_WIDTH + 1) , (int)(TILE_HEIGHT + 1) , (t_vec3){ -1, 0, 0 });
-	if (!(map = ft_create_map("level1.map")))
+	
+	ft_create_player(&player, TILE_WIDTH + 0.5, TILE_HEIGHT + 0.5, (t_vec3){ -1, 0, 0 });
+	if (!(map = ft_create_map("level1.map", &player)))
 		return (1);
 	//Initialize PNG loading
 	if(!(IMG_Init( IMG_INIT_JPG ) & IMG_INIT_JPG))

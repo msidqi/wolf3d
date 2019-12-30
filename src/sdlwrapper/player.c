@@ -83,7 +83,7 @@ void ft_init_player_controller(t_player *player)
 	}
 }
 
-void	ft_create_player(t_player *player, Uint32 x, Uint32 y, t_vec3 look_dir)
+void	ft_create_player(t_player *player, double x, double y, t_vec3 look_dir)
 {
 	player->pos = (t_vec3){ x, y, 0 };
 	player->forw = ft_vec3_normalize(look_dir);

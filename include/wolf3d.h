@@ -166,7 +166,6 @@ typedef struct s_player
 	double		rotation_angle;
 	double		speed;
 	double		height;
-    // t_camera    camera;
 }				t_player;
 
 void			*ft_save_ppm_pixels(void *surface);
@@ -174,7 +173,7 @@ void			ft_draw_player(SDL_Surface *surface, int ox, int oy);
 void			ft_init_player_controller(t_player *player);
 void			ft_player_input(t_player *player, SDL_Event event, SDL_Surface *surface);
 void			ft_player_physics(t_player *player, t_map *map);
-void			ft_create_player(t_player *player, Uint32 x, Uint32 y, t_vec3 look_dir);
+void			ft_create_player(t_player *player, double x, double y, t_vec3 look_dir);
 void			ft_player_move(t_player *player);
 void			ft_player_velocity(t_player *player, double speed);
 void			ft_player_rotate(t_player *player, double rotation_angle);
@@ -193,12 +192,12 @@ int				ft_shift_is_down(void);
 void			ft_print_map(t_map *map, t_player *player);
 void			ft_draw_mini_map(SDL_Surface *surface, t_map *map, t_player *player);
 void			ft_draw_mini_map_wall_inter(t_ray_hit wall, SDL_Surface *bmp);
-t_map			*ft_create_map(char *file);
+t_map			*ft_create_map(char *file, t_player *player);
 void			ft_destroy_map(t_map *map);
 void			ft_ray_cast_scene(t_player *player, t_map *map, t_sdl_data *sdl_data);
 int				ft_ray_cast(t_ray *ray, t_vec3 origin, t_vec3 direction, t_map *map);
 void			ft_find_closest_wall(t_ray *ray, t_map *map, t_vec3 forward);
-t_map			*ft_get_map_from_file(int fd);
+t_map			*ft_get_map_from_file(int fd, t_player *player);
 void			ft_put_error(char *traceback);
 
 #endif

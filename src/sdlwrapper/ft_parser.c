@@ -63,7 +63,23 @@ static void	ft_clean_tiles(int i, char *error, t_map *map)
 	perror(error);
 }
 
-int		ft_fill_map_tiles(int fd, t_map *map)
+void	ft_fill_tile(int i, int j, char c, t_tile *tile)
+{
+	tile->width = TILE_WIDTH;
+	tile->height = TILE_HEIGHT;
+	tile->index.x = j;
+	tile->index.y = i;
+	tile->depth = (c == '0' || c == 'P' || c == 'E') ? 0.0 : 1.0;
+}
+
+void	ft_fill_pos(int i, int j, t_vec3 *pos)
+{
+	pos->x = j * TILE_WIDTH + 0.5;
+	pos->y = i * TILE_HEIGHT + 0.5;
+	pos->z = 0;
+}
+
+int		ft_fill_map_tiles(int fd, t_map *map, t_player *player)
 {
 	char    *line;
 	int     rvalue;
@@ -71,9 +87,9 @@ int		ft_fill_map_tiles(int fd, t_map *map)
 	int		j;
 
 	i = 0;
-	while ((rvalue = get_next_line(fd, &line)))
-	{// printf("%zu, w %d h %d | %s\n", ft_strlen(line), map->width, map->height, line);
-		if (i >= map->height || ft_strlen(line) != (size_t)map->width || !(map->tiles[i] = (t_tile *)malloc(sizeof(t_tile) * map->width)))
+	while ((rvalue = get_next_line(fd, &line)) && i != map->height)
+	{
+		if (ft_strlen(line) != (size_t)map->width || !(map->tiles[i] = (t_tile *)malloc(sizeof(t_tile) * map->width)))
 		{
 			ft_clean_tiles(i - 1 , "Invalid number of tiles.\n", map);
 			return (0);
@@ -81,26 +97,30 @@ int		ft_fill_map_tiles(int fd, t_map *map)
 		j = -1;
 		while (line[++j])
 		{
-			if (line[j] != '0' && line[j] != '1')
+			if (line[j] != '0' || line[j] != '1' || line[j] != 'P')
 			{
-				ft_clean_tiles(i, "map should contain only 1's and 0's.\n", map);
+				ft_fill_tile(i, j, line[j], &map->tiles[i][j]);
+				if (line[j] == 'P')
+					ft_fill_pos(i, j, &player->pos);
+			}
+			else
+			{
+				ft_clean_tiles(i, "map should contain only (0|1|E|P)'s.\n", map);
 				return (0);
 			}
-			map->tiles[i][j].width = TILE_WIDTH;
-			map->tiles[i][j].height = TILE_HEIGHT;
-			map->tiles[i][j].index.x = j;
-			map->tiles[i][j].index.y = i;
-			map->tiles[i][j].depth = line[j] == '1' ? 1.0 : 0.0;// ft_putchar(line[j]);
 		}
 		free(line);
 		i++;
-		if (i == map->height)
-			break ;
+	}
+	if (i != map->height)
+	{
+		ft_clean_tiles(i - 1, "Invalid number of tiles.\n", map);
+		return (0);
 	}
 	return (1);
 }
 
-t_map	*ft_get_map_from_file(int fd)
+t_map	*ft_get_map_from_file(int fd, t_player *player)
 {
 	t_map *map;
 	
@@ -112,9 +132,9 @@ t_map	*ft_get_map_from_file(int fd)
 		ft_memdel((void **)&map);
 		return (NULL);
 	}
-	printf("height %d width %d\n", map->height, map->width);
+	// printf("height %d width %d\n", map->height, map->width);
 	if (!(map->tiles = (t_tile **)malloc(sizeof(t_tile *) * map->height))
-		|| !(ft_fill_map_tiles(fd, map)))
+		|| !(ft_fill_map_tiles(fd, map, player)))
 	{
 		printf("Error in ft_fill_map_tiles\n");
 		ft_memdel((void **)&map);
