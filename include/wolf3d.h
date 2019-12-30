@@ -35,7 +35,7 @@
 # define MINI_MAP_BMP_HEIGHT 400
 # define MINI_MAP_BMP_WIDTH 400
 # define SURFACE_H_IS_ODD ((BMP_HEIGHT % 2 == 0) ? 0 : 1)
-# define TEXTURE_NUM 4
+# define TEXTURE_NUM 5
 # define ROTATION_ANGLE 0.0372665
 # define PLAYER_SPEED 0.1
 # define SECOND 1000000000

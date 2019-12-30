@@ -23,7 +23,7 @@ void ft_draw_player(SDL_Surface *surface, int ox, int oy)
 	}
 }
 
-void	ft_player_input(t_player *player, SDL_Event event, SDL_Surface *surface)
+void	ft_player_input(t_player *player, SDL_Event event, SDL_Surface *bmp)
 {
 	Uint16		activated;
 	Uint32		scan_code;
@@ -66,7 +66,7 @@ void	ft_player_input(t_player *player, SDL_Event event, SDL_Surface *surface)
 			player->controller[PLAYER_LOOK_DOWN] = activated; break;
 	}
 	if (scan_code == SDL_SCANCODE_T && event.type == SDL_KEYUP)
-		pthread_create(&thread_id, NULL, &ft_save_ppm_pixels, (void *)surface);
+		pthread_create(&thread_id, NULL, &ft_save_ppm_pixels, (void *)bmp);
 }
 
 void ft_init_player_controller(t_player *player)

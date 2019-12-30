@@ -243,12 +243,12 @@ SDL_Surface **get_all_textures(void)
 
 	if (!initialized)
 	{
+		ft_putendl_fd("Loading Textures...", 1);
 		game_textures[0] = IMG_Load("./Textures/NORTH.JPG");
 		game_textures[1] = IMG_Load("./Textures/SOUTH.JPG");
 		game_textures[2] = IMG_Load("./Textures/EAST.JPG");
 		game_textures[3] = IMG_Load("./Textures/WEST.JPG");
-		// IMG_Load("SKY.JPG"),
-		// IMG_Load("GROUND.JPG"),
+		game_textures[4] = IMG_Load("./Textures/SKY6.JPG");
 		i = -1;
 		while (++i < TEXTURE_NUM)
 			if (!game_textures[i])
@@ -317,55 +317,6 @@ int ft_ray_cast(t_ray *ray, t_vec3 origin, t_vec3 direction, t_map *map)
 	return (1);
 }
 
-/* void ft_draw_walls(int x, t_ray_hit wall, SDL_Surface *bmp, t_player *player)
-{
-	int i;
-	int j;
-	int counter;
-	double wall_height;
-
-	if (wall.facing == SKYBOX)
-		return ;// draw skybox
-	i = bmp->h / 2 + player->height;
-	j = i + 1;
-	counter = 0;
-	wall_height = (int)(bmp->h / wall.distance_from_origin + 20);
-	int txt0;
-	int txt1;
-	txt0 = wall_height / 2;
-	txt1 = txt0 + 1;
-
-	double mapped_x;
-	if (wall.facing == NORTH || wall.facing == SOUTH)
-		mapped_x = (int)wall.point.x % TILE_WIDTH / TILE_WIDTH;
-	else
-		mapped_x = (int)wall.point.y % TILE_HEIGHT / TILE_HEIGHT;
-	while (counter < wall_height / 2)
-	{
-		if (i >= 0 && txt0 >= 0)
-		{
-			// wall_height = (double)i / TILE_DEPTH;
-			//printf("wall_height %f\n ", wall_height);
-				// printf("x: %f | y: %f | t_width: %d | t_height %d\n", (double)x / BMP_WIDTH, (double)i / bmp->h, textures[wall.facing]->w, textures[wall.facing]->h);
-			// printf("%d | %d\n",
-			// (int)(((double)x / BMP_WIDTH) * textures[wall.facing]->w),
-			// (int)(((double)i / bmp->h) * textures[wall.facing]->h));
-			// printf("mapped_x %d %d\n", mapped_x, txt0 / wall_height);
-			put_pixel32(bmp, x, i, get_wall_texture(mapped_x, txt0 / wall_height, wall, bmp));//, get_wall_texture(x, i, wall)
-			txt0--;
-			i--;
-		}
-		if (j + player->height < bmp->h && txt1 < wall_height)
-		{
-			put_pixel32(bmp, x, j, get_wall_texture(mapped_x, txt1 / wall_height, wall, bmp));
-			txt1++;
-			j++;
-		}
-		counter++;
-	}
-	(void)x;
-}*/
-
 void	ft_ray_cast_scene(t_player *player, t_map *map, t_sdl_data *sdl_data)
 {
 	int x;
@@ -393,23 +344,38 @@ void	ft_ray_cast_scene(t_player *player, t_map *map, t_sdl_data *sdl_data)
 	}
 }
 
+int get_sky_texture(int x, int y, SDL_Surface *bmp)
+{
+	int color;
+	SDL_Surface *sky;
+
+	sky = get_all_textures()[4];
+			// printf("mapped x: %d | mapped y: %d\n", (int)(((double)x / bmp->w) * sky->w), (int)(((double)y / bmp->w) * sky->h));
+	color = getpixel(sky,
+	(int)(((double)x / bmp->w) * sky->w)
+	, (int)(((double)y / bmp->h + 0.5) * sky->h));
+	return (0xFF000000 + color);
+}
+
 void ft_fill_background(SDL_Surface *bmp, t_player *player)
 {
 	(void)player;
 	int x;
 	int y;
-	// double perc;
 
 	x = 0;
+	
 	while (x < bmp->w)
 	{
-		y = 0;
-		while (y < bmp->h / 2 + player->height)
+		double dot = ft_vec3_dot_product(player->forw, RIGHT);
+		t_vec3 cross = ft_vec3_cross_product(player->forw, RIGHT);
+		if (ft_vec3_dot_product(FORW, cross) <= 0)
+			dot = -dot;
+		y = bmp->h / 2 + player->height;
+		while (y >= 0)
 		{
-			// perc = ((double)y / (double)(bmp->h / 2));
-			// ft_color_rgb_scalar(0xFF5381FF, perc, perc, perc)
-			put_pixel32(bmp, x, y, 0xFF393739);
-			y++;
+			put_pixel32(bmp, (x + (int)(((dot + 1) / 2) * bmp->w)) % bmp->w, y, get_sky_texture(x, y - player->height, bmp));
+			y--;
 		}
 		x++;
 	}
@@ -419,7 +385,6 @@ void ft_fill_background(SDL_Surface *bmp, t_player *player)
 		y = bmp->h / 2 + player->height;
 		while (y < bmp->h)
 		{
-			// perc = ((double)y / (double)(bmp->h / 2));
 			 put_pixel32(bmp, x, y, 0xFF717171);
 			 y++;
 		}
@@ -503,16 +468,17 @@ void	ft_free_textures(void)
 	SDL_Surface **array_to_free;
 	
 	array_to_free = get_all_textures();
-	while (++k < TEXTURE_NUM)
-		if (array_to_free[k])
-			SDL_FreeSurface(array_to_free[k]);
+	if (array_to_free)
+		while (++k < TEXTURE_NUM)
+			if (array_to_free[k])
+				SDL_FreeSurface(array_to_free[k]);
 }
 
 void	ft_free_surface(t_sdl_data *sdl_data)
 {
-	if (sdl_data->bmp)
+	if (sdl_data->bmp != NULL)
 		SDL_FreeSurface(sdl_data->bmp);
-	if (sdl_data->mini_map_bmp)
+	if (sdl_data->mini_map_bmp != NULL)
 		SDL_FreeSurface(sdl_data->mini_map_bmp);
 }
 void	ft_graceful_shutdown(t_sdl_data *sdl_data, t_map *map, Mix_Music *backgroundsound)
@@ -595,7 +561,8 @@ int	main(void)
 	}
 	Mix_PlayMusic(backgroundsound, -1);
 	//Init Textures
-	get_all_textures();
+	if (!get_all_textures())
+		sdl_data.quit = true;
 	while (!sdl_data.quit)
 	{
 		while (SDL_PollEvent(&sdl_data.event))

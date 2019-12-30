@@ -247,6 +247,7 @@ SDL_Surface **get_all_textures(void)
 		game_textures[1] = IMG_Load("./Textures/SOUTH.JPG");
 		game_textures[2] = IMG_Load("./Textures/EAST.JPG");
 		game_textures[3] = IMG_Load("./Textures/WEST.JPG");
+		game_textures[4] = IMG_Load("./Textures/WEST.JPG");
 		// IMG_Load("SKY.JPG"),
 		// IMG_Load("GROUND.JPG"),
 		i = -1;
@@ -537,6 +538,7 @@ int	main(void)
 	t_sdl_data  sdl_data;
 	SDL_Surface *surface;
 
+		printf("here--------\n");
 	ft_sdl_init_data(&sdl_data);
 
 	if(SDL_Init(SDL_INIT_AUDIO) == -1)
@@ -568,6 +570,7 @@ int	main(void)
 	}
 	Mix_PlayMusic(backgroundsound, -1);
 	//Init Textures
+
 	get_all_textures();
 	while (!sdl_data.quit)
 	{
@@ -576,15 +579,13 @@ int	main(void)
 			// printf("\e[1;1H\e[2J");
 			if (sdl_data.event.type == SDL_QUIT || sdl_data.event.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
 				sdl_data.quit = true;
-			surface = ft_create_surface(BMP_WIDTH, BMP_HEIGHT, BPP);
-			SDL_BlitSurface(sdl_data.bmp,NULL,surface,NULL);
-			ft_player_input(&player, sdl_data.event, surface);
+			ft_player_input(&player, sdl_data.event, sdl_data.bmp);
 		}
 		ft_apply_physics(&player, map);
 		ft_apply_render(&sdl_data, map, &player);
 	}
 	printf("EXIT!\n");
-	SDL_FreeSurface(surface);
+	// SDL_FreeSurface(surface);
 	ft_graceful_shutdown(&sdl_data, map, backgroundsound);
 }
 
