@@ -69,7 +69,7 @@ void	ft_fill_tile(int i, int j, char c, t_tile *tile)
 	tile->height = TILE_HEIGHT;
 	tile->index.x = j;
 	tile->index.y = i;
-	tile->depth = (c == '0' || c == 'P' || c == 'E') ? 0.0 : 1.0;
+	tile->depth = (c == '0' || c == 'P') ? 0.0 : 1.0;
 }
 
 void	ft_fill_pos(int i, int j, t_vec3 *pos)
@@ -89,7 +89,7 @@ int		ft_fill_map_tiles(int fd, t_map *map, t_player *player)
 	i = 0;
 	while ((rvalue = get_next_line(fd, &line)) && i != map->height)
 	{
-		if (ft_strlen(line) != (size_t)map->width || !(map->tiles[i] = (t_tile *)malloc(sizeof(t_tile) * map->width)))
+		if (i == 72 || ft_strlen(line) > 128 || ft_strlen(line) != (size_t)map->width || !(map->tiles[i] = (t_tile *)malloc(sizeof(t_tile) * map->width)))
 		{
 			ft_clean_tiles(i - 1 , "Invalid number of tiles.\n", map);
 			return (0);
@@ -97,7 +97,7 @@ int		ft_fill_map_tiles(int fd, t_map *map, t_player *player)
 		j = -1;
 		while (line[++j])
 		{
-			if (line[j] != '0' || line[j] != '1' || line[j] != 'P')
+			if (line[j] == '0' || line[j] == '1' || line[j] == 'P')
 			{
 				ft_fill_tile(i, j, line[j], &map->tiles[i][j]);
 				if (line[j] == 'P')

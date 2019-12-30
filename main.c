@@ -692,7 +692,6 @@ int	main(void)
 			TTF_CloseFont(font);
 			ft_graceful_shutdown(&sdl_data, map, backgroundsound);
 		}
-			//printf("flag = %d\n", flag);
 	}
 	if (flag_menu != -1)
 	{

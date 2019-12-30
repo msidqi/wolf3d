@@ -21,7 +21,7 @@ void	ft_sdl_init_data(t_sdl_data *sdl_data)
 	sdl_data->mini_map_bmp = NULL;
 	sdl_data->win = ft_sdl_init_create_window(500, 400, WIN_WIDTH, WIN_HEIGHT);
 	sdl_data->bmp = ft_create_surface(BMP_WIDTH, BMP_HEIGHT, BPP);
-	sdl_data->mini_map_bmp = ft_create_surface(MINI_MAP_BMP_WIDTH, MINI_MAP_BMP_HEIGHT, BPP);
+	sdl_data->mini_map_bmp = ft_create_surface(BMP_WIDTH, BMP_HEIGHT, BPP);
 	if (!sdl_data->bmp || !sdl_data->mini_map_bmp)
 	{
 		perror(SDL_GetError());
