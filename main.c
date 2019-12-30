@@ -237,12 +237,13 @@ void ft_find_closest_wall(t_ray *ray, t_map *map, t_vec3 forward)//t_player *pla
 
 SDL_Surface **get_all_textures(void)
 {
-	static int initialized = 0;
 	static SDL_Surface *game_textures[TEXTURE_NUM];
+	static int initialized = 0;
 	int i;
 
 	if (!initialized)
 	{
+		initialized = 1;
 		ft_putendl_fd("Loading Textures...", 1);
 		game_textures[0] = IMG_Load("./Textures/NORTH.JPG");
 		game_textures[1] = IMG_Load("./Textures/SOUTH.JPG");
@@ -252,8 +253,10 @@ SDL_Surface **get_all_textures(void)
 		i = -1;
 		while (++i < TEXTURE_NUM)
 			if (!game_textures[i])
+			{
+				ft_putendl_fd("Texture file missing.", 2);
 				return (NULL);
-		initialized = 1;
+			}
 
 	}
 	return (game_textures);
