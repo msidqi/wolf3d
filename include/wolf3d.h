@@ -15,7 +15,7 @@
 # define HEIGHT 500
 # define WIDTH 500
 # define WIN_HEIGHT 720
-# define WIN_WIDTH 1600
+# define WIN_WIDTH 1280
 # define BPP 32
 # define DOWN (t_vec3){0, 1, 0}
 # define UP (t_vec3){0, -1, 0}
@@ -31,7 +31,7 @@
 # define MINI_MAP_RATIO_WIDTH ((double)TILE_WIDTH / (double)MINI_MAP_TILE_WIDTH)
 # define MINI_MAP_RATIO_HEIGHT ((double)TILE_HEIGHT / (double)MINI_MAP_TILE_HEIGHT)
 # define BMP_WIDTH 1280
-# define BMP_HEIGHT 721
+# define BMP_HEIGHT 720
 # define MINI_MAP_BMP_HEIGHT 400
 # define MINI_MAP_BMP_WIDTH 400
 # define SURFACE_H_IS_ODD ((BMP_HEIGHT % 2 == 0) ? 0 : 1)
@@ -192,6 +192,22 @@ typedef struct	s_menu_env
 	Mix_Music		*backgroundsound;
 }				t_menu_env;
 
+void			ft_free_surface(t_sdl_data *sdl_data);
+void			ft_free_textures(void);
+void			ft_update_screen(t_sdl_data *sdl_data);
+void 			ft_clear_screen(t_sdl_data *sdl_data);
+void 			ft_apply_render(t_sdl_data *sdl_data, t_map *map, t_player *player);
+void			ft_apply_physics(t_player *player, t_map *map);
+t_index 		get_map_index(t_vec3 position, t_map *map);
+t_vec3			ft_limit_inter_by_map(t_vec3 position, t_map *map);
+t_index			ft_limit_index_by_map(t_index index, t_map *map);
+double			ft_limit_inter(t_vec3 position, double to_add);
+void 			ft_draw_walls(int x, t_ray_hit wall, SDL_Surface *bmp, t_player *player);
+t_vec3			ft_limit_inter_by_map(t_vec3 position, t_map *map);
+t_vec3			ft_map_pixels_to_world(int x, t_player *player);
+SDL_Surface 	**get_all_textures(void);
+int 			get_sky_texture(int x, int y, SDL_Surface *bmp);
+int 			get_wall_texture(int y, t_ray_hit wall, SDL_Surface *bmp);
 void			ft_init_bgmusic(Mix_Music *backgroundsound, t_sdl_data sdl_data);
 void			ft_init_text_layer(t_text_layer *tl, t_sdl_data sdl_data);
 void			ft_menu_loop_content(t_sdl_data *sdl_data, int flags[2], t_menu_env	*menu_env, t_map *map);
