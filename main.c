@@ -22,7 +22,7 @@ void ft_draw_walls(int x, t_ray_hit wall, SDL_Surface *bmp, t_player *player)
 	int j;
 	int counter;
 	if (wall.facing == SKYBOX)
-		return ;// draw skybox
+		return ;
 	i = bmp->h / 2 + player->height;
 	j = i + 1;
 	counter = 0;
@@ -43,7 +43,7 @@ void ft_draw_walls(int x, t_ray_hit wall, SDL_Surface *bmp, t_player *player)
 	}
 }
 
-static void	ft_game_loop_content(t_sdl_data *sdl_data, t_player	*player, t_map *map)
+static void	ft_game_loop_content(t_sdl_data *sdl_data, t_player	*player, t_map *map, t_text_layer *tl)
 {
 	while (!sdl_data->quit)
 	{
@@ -53,7 +53,7 @@ static void	ft_game_loop_content(t_sdl_data *sdl_data, t_player	*player, t_map *
 				sdl_data->quit = true;
 			ft_player_input(player, sdl_data->event, sdl_data->bmp);
 		}
-		ft_apply_render(sdl_data, map, player);
+		ft_apply_render(sdl_data, map, player, tl);
 		ft_apply_physics(player, map);
 	}
 }
@@ -68,6 +68,8 @@ int	main(void)
 
 	ft_sdl_init_data(&sdl_data);
 	menu_env.backgroundsound = NULL;
+	menu_env.tl.fps = NULL;
+	sdl_data.fps = 0;
 	flags[0] = 0;
 	flags[1] = 0;
 	ft_init_text_layer(&menu_env.tl, sdl_data);
@@ -81,7 +83,11 @@ int	main(void)
 		sdl_data.startgame = true;
 	}
 	ft_menu_loop_content(&sdl_data, flags, &menu_env, map);
-	ft_game_loop_content(&sdl_data, &player, map);
+	menu_env.tl.fps_font = TTF_OpenFont("font/destroy.ttf", 15);
+	menu_env.tl.text_pos.x = BMP_WIDTH - 40;
+	menu_env.tl.text_pos.y = BMP_HEIGHT - 30;
+	ft_game_loop_content(&sdl_data, &player, map, &menu_env.tl);
 	TTF_CloseFont(menu_env.tl.font);
+	TTF_CloseFont(menu_env.tl.fps_font);
 	ft_graceful_shutdown(&sdl_data, map, menu_env.backgroundsound);
 }

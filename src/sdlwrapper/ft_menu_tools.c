@@ -6,7 +6,7 @@
 /*   By: aabouibr <aabouibr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/12/31 08:30:17 by aabouibr          #+#    #+#             */
-/*   Updated: 2019/12/31 08:50:38 by aabouibr         ###   ########.fr       */
+/*   Updated: 2019/12/31 10:41:26 by aabouibr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ void	ft_init_bgmusic(Mix_Music *backgroundsound, t_sdl_data sdl_data)
 		ft_free_surface(&sdl_data);
 		exit(2);
 	}
-    backgroundsound = Mix_LoadMUS("1.wav");
+    backgroundsound = Mix_LoadMUS("bg.wav");
 	if (!backgroundsound)
 	{
     	perror(Mix_GetError());

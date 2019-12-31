@@ -6,7 +6,7 @@
 /*   By: aabouibr <aabouibr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/12/31 09:09:10 by aabouibr          #+#    #+#             */
-/*   Updated: 2019/12/31 09:09:33 by aabouibr         ###   ########.fr       */
+/*   Updated: 2019/12/31 10:41:15 by aabouibr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,11 +19,14 @@ void ft_clear_screen(t_sdl_data *sdl_data)
 	SDL_FillRect(sdl_data->display, NULL, 0x000000);
 }
 
-void	ft_update_screen(t_sdl_data *sdl_data)
+void	ft_update_screen(t_text_layer *tl, t_sdl_data *sdl_data)
 {
 	SDL_BlitSurface(sdl_data->bmp, NULL, sdl_data->display, NULL);
 	SDL_BlitSurface(sdl_data->mini_map_bmp, NULL, sdl_data->display, NULL);
+    tl->fps = TTF_RenderText_Solid(tl->fps_font,ft_itoa(sdl_data->fps), tl->color[1]);
+    SDL_BlitSurface(tl->fps, NULL, sdl_data->display, &tl->text_pos);
 	SDL_UpdateWindowSurface(sdl_data->win);
+    SDL_FreeSurface(tl->fps);
 }
 
 void	ft_free_textures(void)

@@ -70,6 +70,7 @@ typedef struct	s_sdl_data
 	SDL_Surface *menu[2];
 	int			quit;
 	int			startgame;
+	int			fps;
 }				t_sdl_data;
 
 typedef struct s_action
@@ -182,7 +183,9 @@ typedef struct	s_text_layer
 {
 	SDL_Rect	text_pos;
 	SDL_Surface *options[3];
+	SDL_Surface *fps;
 	TTF_Font	*font;
+	TTF_Font	*fps_font;
 	SDL_Color	color[2];
 }				t_text_layer;
 
@@ -194,9 +197,9 @@ typedef struct	s_menu_env
 
 void			ft_free_surface(t_sdl_data *sdl_data);
 void			ft_free_textures(void);
-void			ft_update_screen(t_sdl_data *sdl_data);
+void			ft_update_screen(t_text_layer *tl, t_sdl_data *sdl_data);
 void 			ft_clear_screen(t_sdl_data *sdl_data);
-void 			ft_apply_render(t_sdl_data *sdl_data, t_map *map, t_player *player);
+void 			ft_apply_render(t_sdl_data *sdl_data, t_map *map, t_player *player, t_text_layer *tl);
 void			ft_apply_physics(t_player *player, t_map *map);
 t_index 		get_map_index(t_vec3 position, t_map *map);
 t_vec3			ft_limit_inter_by_map(t_vec3 position, t_map *map);

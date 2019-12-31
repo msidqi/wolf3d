@@ -6,7 +6,7 @@
 /*   By: aabouibr <aabouibr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/12/31 09:02:25 by aabouibr          #+#    #+#             */
-/*   Updated: 2019/12/31 09:06:12 by aabouibr         ###   ########.fr       */
+/*   Updated: 2019/12/31 10:09:03 by aabouibr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ static void ft_fill_background(SDL_Surface *bmp, t_player *player)
 	}
 }
 
-static void ft_fps_counter(void)
+static void ft_fps_counter(t_sdl_data *sdl_data)
 {
 	static int prev_tick = 0;
 	static int fps = 0;
@@ -55,7 +55,7 @@ static void ft_fps_counter(void)
 		prev_tick = SDL_GetTicks();
 	if (((SDL_GetTicks() - prev_tick)) > 1000)
 	{
-		printf("\033[2J\nfps %d\n", fps);
+		sdl_data->fps = fps;
 		prev_tick = SDL_GetTicks();
 		fps = 0;
 	}
@@ -74,12 +74,12 @@ void	ft_apply_physics(t_player *player, t_map *map)
 	}
 }
 
-void ft_apply_render(t_sdl_data *sdl_data, t_map *map, t_player *player)
+void ft_apply_render(t_sdl_data *sdl_data, t_map *map, t_player *player, t_text_layer *tl)
 {
 	ft_clear_screen(sdl_data);
-	ft_fps_counter();
 	ft_fill_background(sdl_data->bmp, player);
 	ft_draw_mini_map(sdl_data->mini_map_bmp, map, player);
 	ft_handle_threads(player, map, sdl_data);
-	ft_update_screen(sdl_data);
+	ft_fps_counter(sdl_data);
+	ft_update_screen(tl, sdl_data);
 }
