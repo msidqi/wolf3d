@@ -167,7 +167,6 @@ void	ft_check_player_collision(t_player *player, t_map *map)
 {
 	t_vec3 future_pos;
 	
-	// printf("%f %f\n", player->velocity.x, player->velocity.y);
 	future_pos = ft_vec3_add(player->pos, player->velocity); // any direction
 	ft_limit_velocity(future_pos, player, map);
 	future_pos = ft_vec3_add(ft_vec3_add(player->pos, player->velocity), ft_vec3_rotate_z(player->velocity, 0.174533));//ft_vec3_scalar(player->right, 0.5));

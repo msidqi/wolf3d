@@ -68,16 +68,20 @@ static void	*ft_ray_cast_scene(void	*param)
 {
 	int				x;
 	t_vec3			mapped_pos;
-	t_vec3			direction;
+	t_vec3			dir;
 	t_ray			ray;
 	t_thread_data	*data;
+
+	ray.ray_hit.distance_from_origin = MEGA;
+	ray.ray_hit.facing = SKYBOX;
+	ray.ray_hit.type = -1;
 	data = (t_thread_data *)param;
 	x = data->stend.x;
 	while (x < data->stend.y)
 	{
 		mapped_pos = ft_map_pixels_to_world(x, data->player);
-		direction = ft_vec3_normalize(ft_vec3_sub(mapped_pos, data->player->pos));
-		ft_ray_cast(&ray, data->player->pos, direction, data->map);
+		dir = ft_vec3_normalize(ft_vec3_sub(mapped_pos, data->player->pos));
+		ft_ray_cast(&ray, data->player->pos, dir, data->map);
 		ft_find_closest_wall(&ray, data->map, data->player->forw);
 		if (ray.ray_hit.type == WALL)
 		{
