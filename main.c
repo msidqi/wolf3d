@@ -1,6 +1,6 @@
 #include "wolf3d.h"
 
-void	ft_putcharr(char c)
+/*void	ft_putcharr(char c)
 {
 	write(1, &c, 1);
 }
@@ -28,7 +28,7 @@ void	ft_putnbrr(int nb)
 	{
 		ft_putcharr(x + '0');
 	}
-}
+}*/
 
 
 int	game_manager(t_action *actions)
@@ -320,26 +320,53 @@ int ft_ray_cast(t_ray *ray, t_vec3 origin, t_vec3 direction, t_map *map)
 	return (1);
 }
 
-void	ft_ray_cast_scene(t_player *player, t_map *map, t_sdl_data *sdl_data)
+static void	*ft_ray_cast_scene(void	*param)
 {
-	int x;
-	t_vec3	mapped_pos;
-	t_ray ray;
-	t_vec3 direction;
-
-	x = -1;
-	while (++x < BMP_WIDTH)
+	int				x;
+	t_vec3			mapped_pos;
+	t_vec3			direction;
+	t_ray			ray;
+	t_thread_data	*data;
+	data = (t_thread_data *)param;
+	x = data->stend.x;
+	while (x < data->stend.y)
 	{
-		mapped_pos = ft_map_pixels_to_world(x, player);
-		direction = ft_vec3_normalize(ft_vec3_sub(mapped_pos, player->pos));
-		ft_ray_cast(&ray, player->pos, direction, map);
-		ft_find_closest_wall(&ray, map, player->forw);
+		mapped_pos = ft_map_pixels_to_world(x, data->player);
+		direction = ft_vec3_normalize(ft_vec3_sub(mapped_pos, data->player->pos));
+		ft_ray_cast(&ray, data->player->pos, direction, data->map);
+		ft_find_closest_wall(&ray, data->map, data->player->forw);
 		if (ray.ray_hit.type == WALL)
 		{
-			ft_draw_walls(x, ray.ray_hit, sdl_data->bmp, player);
-			ft_draw_mini_map_wall_inter(ray.ray_hit, sdl_data->mini_map_bmp);
+			ft_draw_walls(x, ray.ray_hit, data->sdl_data->bmp, data->player);
+			ft_draw_mini_map_wall_inter(ray.ray_hit, data->sdl_data->mini_map_bmp);
 		}
+		x++;
 	}
+	return (NULL);
+}
+void	ft_handle_threads(t_player *player, t_map *map, t_sdl_data *sdl_data)
+{
+	pthread_t		ids[N_THREADS];
+	t_thread_data	thread_data;
+	t_thread_data	copies[N_THREADS];
+	int				i;
+	thread_data.map = map;
+	thread_data.player = player;
+	thread_data.sdl_data = sdl_data;
+	i = -1;
+	while (++i < N_THREADS)
+			copies[i] = thread_data;
+	copies[0].stend = (t_vec2int){0, BMP_WIDTH / 4};
+	pthread_create(&ids[0], NULL, &ft_ray_cast_scene, (void *)&copies[0]);
+	copies[1].stend = (t_vec2int){copies[0].stend.y, BMP_WIDTH / 2};
+	pthread_create(&ids[1], NULL, &ft_ray_cast_scene, (void *)&copies[1]);
+	copies[2].stend = (t_vec2int){copies[1].stend.y, BMP_WIDTH - (BMP_WIDTH / 4)};
+	pthread_create(&ids[2], NULL, &ft_ray_cast_scene, (void *)&copies[2]);
+	copies[3].stend = (t_vec2int){copies[2].stend.y, BMP_WIDTH};
+	pthread_create(&ids[3], NULL, &ft_ray_cast_scene, (void *)&copies[3]);
+	i = -1;
+	while (++i < N_THREADS)
+		pthread_join(ids[i], NULL);
 }
 
 int get_sky_texture(int x, int y, SDL_Surface *bmp)
@@ -455,7 +482,8 @@ void ft_apply_render(t_sdl_data *sdl_data, t_map *map, t_player *player)
 	ft_fps_counter();
 	ft_fill_background(sdl_data->bmp, player);
 	ft_draw_mini_map(sdl_data->mini_map_bmp, map, player);
-	ft_ray_cast_scene(player, map, sdl_data);
+	ft_handle_threads(player, map, sdl_data);
+	//ft_ray_cast_scene(player, map, sdl_data);
 	// ft_debug_screen_line(sdl_data->bmp);
 	ft_update_screen(sdl_data);
 }
@@ -478,20 +506,41 @@ void	ft_free_surface(t_sdl_data *sdl_data)
 		SDL_FreeSurface(sdl_data->bmp);
 	if (sdl_data->mini_map_bmp != NULL)
 		SDL_FreeSurface(sdl_data->mini_map_bmp);
+	if (sdl_data->menu[0] != NULL)
+		SDL_FreeSurface(sdl_data->menu[0]);
+	if (sdl_data->menu[1] != NULL)
+		SDL_FreeSurface(sdl_data->menu[1]);
+	if (sdl_data->win != NULL)
+		SDL_DestroyWindow(sdl_data->win);
 }
+
 void	ft_graceful_shutdown(t_sdl_data *sdl_data, t_map *map, Mix_Music *backgroundsound)
 {
 	ft_destroy_map(map);
 	ft_free_textures();
 	ft_free_surface(sdl_data);
-	if (sdl_data->win != NULL)
-		SDL_DestroyWindow(sdl_data->win);
 	Mix_FreeMusic(backgroundsound);
 	Mix_CloseAudio();
 	Mix_Quit();
 	IMG_Quit();
 	TTF_Quit();
 	SDL_Quit();
+	exit(1);
+}
+
+void	ft_game_loop_content(t_sdl_data *sdl_data, t_player	*player, t_map *map)
+{
+	while (!sdl_data->quit)
+	{
+		while (SDL_PollEvent(&sdl_data->event))
+		{
+			if (sdl_data->event.type == SDL_QUIT || sdl_data->event.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
+				sdl_data->quit = true;
+			ft_player_input(player, sdl_data->event, sdl_data->bmp);
+		}
+		ft_apply_render(sdl_data, map, player);
+		ft_apply_physics(player, map);
+	}
 }
 
 int	main(void)
@@ -499,207 +548,27 @@ int	main(void)
 	t_map		*map;
 	t_player	player;
 	t_sdl_data  sdl_data;
-	int			flag;
-	int			flag_menu;
-	SDL_Surface *menu[3];
-
-	flag = 0;
-	flag_menu = 0;
-    menu[0] = ft_create_surface(BMP_WIDTH, BMP_HEIGHT, BPP);
-	menu[0] = SDL_LoadBMP("image.bmp");
-	menu[1] = ft_create_surface(BMP_WIDTH, BMP_HEIGHT, BPP);
-	menu[1] = SDL_LoadBMP("options.bmp");
-
-	if (TTF_Init() == -1) 
-	{
-		printf("TTF_Init: %s\n", TTF_GetError());
-		exit(2);
-	}
-	TTF_Font *font;
-	font = TTF_OpenFont("font/destroy.ttf", 45);
-	if(!font)
-	{
-		printf("TTF_OpenFont: %s\n", TTF_GetError());
-		exit(2);
-	}
-	//TTF_SetFontStyle(font, TTF_STYLE_BOLD|TTF_STYLE_ITALIC); font style
-	SDL_Color selcted_color={255,50,0,255};
-	SDL_Color main_color={255,144,0,255};
-	SDL_Surface *start;
-	SDL_Surface *options;
-	SDL_Surface *quit;
-
-	SDL_Rect text_pos;
-	text_pos.h = 100;
-	text_pos.w = 100;
+	int			flags[2];
+	t_menu_env	menu_env;
 
 	ft_sdl_init_data(&sdl_data);
-	if(SDL_Init(SDL_INIT_AUDIO) == -1)
-	{
-		printf("SDL_Init: %s\n", SDL_GetError());
-		exit(1);
-	}
-	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024) == -1)
-	{
-		printf("Mix_OpenAudio: %s\n", Mix_GetError());
-		exit(2);
-	}
-	    // Load audio files
-    Mix_Music *backgroundsound = Mix_LoadMUS("1.wav");
-	if (!backgroundsound)
-	{
-    	printf("Mix_LoadMUS(\"music.mp3\"): %s\n", Mix_GetError());
-    // this might be a critical error..
-	}
-	
+	menu_env.backgroundsound = NULL;
+	flags[0] = 0;
+	flags[1] = 0;
+	ft_init_text_layer(&menu_env.tl, sdl_data);
+	ft_init_bgmusic(menu_env.backgroundsound, sdl_data);
 	ft_create_player(&player, TILE_WIDTH + 0.5, TILE_HEIGHT + 0.5, (t_vec3){ -1, 0, 0 });
 	if (!(map = ft_create_map("level1.map", &player)))
 		return (1);
-	//Initialize PNG loading
-	if(!(IMG_Init( IMG_INIT_JPG ) & IMG_INIT_JPG))
-	{
-		perror(IMG_GetError());
-		exit(1);
-	}
-	Mix_PlayMusic(backgroundsound, -1);
-	//Init Textures
 	if (!get_all_textures())
+	{
 		sdl_data.quit = true;
-	while (!sdl_data.quit)
-	{
-		while (SDL_PollEvent(&sdl_data.event))
-		{
-			// printf("\e[1;1H\e[2J");
-			if (sdl_data.event.type == SDL_QUIT || sdl_data.event.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
-				sdl_data.quit = true;
-			ft_player_input(&player, sdl_data.event, sdl_data.bmp);
-			if (sdl_data.event.key.keysym.scancode == SDL_SCANCODE_KP_ENTER)
-			{
-				if (flag == 0 && flag_menu == 0)
-				{
-					flag_menu = 1;
-					flag = 10;
-				}
-				if (flag == 2 && flag_menu == 0)
-				{
-					flag_menu = 2;
-					flag = 10;
-				}
-				if (flag == 4 && flag_menu == 0)
-				{
-					flag_menu = 3;
-					flag = 10;
-				}
-			}
-			if (sdl_data.event.key.keysym.scancode == SDL_SCANCODE_BACKSPACE)
-			{
-				flag_menu = 0;
-				flag = 0;
-			}
-			if (sdl_data.event.key.keysym.scancode == 96)
-			{
-				if (flag_menu == 0)
-				{
-					flag--;
-					if (flag < 0 && flag != -1)
-						flag = 0;
-				}
-			}
-			if (sdl_data.event.key.keysym.scancode == 93)
-			{
-				if (flag_menu == 0)
-				{
-					flag++;
-					if (flag > 4)
-						flag = 4;
-				}
-			}	
-		}
-		if (flag == 0)
-		{
-			text_pos.x = 645;
-			text_pos.y = 178;
-			SDL_BlitSurface(menu[0], NULL, sdl_data.display, NULL);
-			start = TTF_RenderText_Solid(font,"START",selcted_color);
-			options = TTF_RenderText_Solid(font,"OPTIONS",main_color);
-			quit = TTF_RenderText_Solid(font,"QUIT",main_color);
-			SDL_BlitSurface(start,NULL,sdl_data.display,&text_pos);
-			text_pos.y += 100;
-			text_pos.x -= 25;
-			SDL_BlitSurface(options,NULL,sdl_data.display,&text_pos);
-			text_pos.y += 100;
-			text_pos.x += 55;
-			SDL_BlitSurface(quit,NULL,sdl_data.display,&text_pos);
-			SDL_FreeSurface(start);
-			SDL_FreeSurface(options);
-			SDL_FreeSurface(quit);
-			SDL_UpdateWindowSurface(sdl_data.win);
-		}
-		else if (flag == 2)
-		{
-			text_pos.x = 645;
-			text_pos.y = 178;
-			SDL_BlitSurface(menu[0], NULL, sdl_data.display, NULL);
-			start = TTF_RenderText_Solid(font,"START",main_color);
-			options = TTF_RenderText_Solid(font,"OPTIONS",selcted_color);
-			quit = TTF_RenderText_Solid(font,"QUIT",main_color);
-			SDL_BlitSurface(start,NULL,sdl_data.display,&text_pos);
-			text_pos.y += 100;
-			text_pos.x -= 25;
-			SDL_BlitSurface(options,NULL,sdl_data.display,&text_pos);
-			text_pos.y += 100;
-			text_pos.x += 55;
-			SDL_BlitSurface(quit,NULL,sdl_data.display,&text_pos);
-			SDL_FreeSurface(start);
-			SDL_FreeSurface(options);
-			SDL_FreeSurface(quit);
-			SDL_UpdateWindowSurface(sdl_data.win);
-		}
-		else if (flag == 4)
-		{
-			text_pos.x = 645;
-			text_pos.y = 178;
-			SDL_BlitSurface(menu[0], NULL, sdl_data.display, NULL);
-			start = TTF_RenderText_Solid(font,"START",main_color);
-			options = TTF_RenderText_Solid(font,"OPTIONS",main_color);
-			quit = TTF_RenderText_Solid(font,"QUIT",selcted_color);
-			SDL_BlitSurface(start,NULL,sdl_data.display,&text_pos);
-			text_pos.y += 100;
-			text_pos.x -= 25;
-			SDL_BlitSurface(options,NULL,sdl_data.display,&text_pos);
-			text_pos.y += 100;
-			text_pos.x += 55;
-			SDL_BlitSurface(quit,NULL,sdl_data.display,&text_pos);
-			SDL_FreeSurface(start);
-			SDL_FreeSurface(options);
-			SDL_FreeSurface(quit);
-			SDL_UpdateWindowSurface(sdl_data.win);
-		}
-		if (flag_menu == 1)
-			ft_apply_render(&sdl_data, map, &player);
-		if (flag_menu == 2)
-		{
-			SDL_BlitSurface(menu[1],NULL,sdl_data.display,NULL);
-			SDL_UpdateWindowSurface(sdl_data.win);
-		}
-		ft_apply_physics(&player, map);
-		if (flag_menu == 3)
-		{
-			flag_menu = -1;
-			sdl_data.quit = true;
-			SDL_FreeSurface(menu[0]);
-			SDL_FreeSurface(menu[1]);
-			TTF_CloseFont(font);
-			ft_graceful_shutdown(&sdl_data, map, backgroundsound);
-		}
+		sdl_data.startgame = true;
 	}
-	if (flag_menu != -1)
-	{
-		TTF_CloseFont(font);
-		SDL_FreeSurface(menu[0]);
-		SDL_FreeSurface(menu[1]);
-		ft_graceful_shutdown(&sdl_data, map, backgroundsound);
-	}
+	ft_menu_loop_content(&sdl_data, flags, &menu_env, map);
+	ft_game_loop_content(&sdl_data, &player, map);
+	TTF_CloseFont(menu_env.tl.font);
+	ft_graceful_shutdown(&sdl_data, map, menu_env.backgroundsound);
 }
 
 		// int k, l;

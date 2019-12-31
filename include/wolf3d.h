@@ -67,7 +67,9 @@ typedef struct	s_sdl_data
 	SDL_Surface	*mini_map_bmp;
 	SDL_Surface	*display;
 	SDL_Event	event;
+	SDL_Surface *menu[2];
 	int			quit;
+	int			startgame;
 }				t_sdl_data;
 
 typedef struct s_action
@@ -168,6 +170,33 @@ typedef struct s_player
 	double		height;
 }				t_player;
 
+typedef struct	s_thread_data
+{
+	t_player	*player;
+	t_map		*map;
+	t_sdl_data	*sdl_data;
+	t_vec2int	stend;
+}				t_thread_data;
+
+typedef struct	s_text_layer
+{
+	SDL_Rect	text_pos;
+	SDL_Surface *options[3];
+	TTF_Font	*font;
+	SDL_Color	color[2];
+}				t_text_layer;
+
+typedef struct	s_menu_env
+{
+	t_text_layer	tl;
+	Mix_Music		*backgroundsound;
+}				t_menu_env;
+
+void			ft_init_bgmusic(Mix_Music *backgroundsound, t_sdl_data sdl_data);
+void			ft_init_text_layer(t_text_layer *tl, t_sdl_data sdl_data);
+void			ft_menu_loop_content(t_sdl_data *sdl_data, int flags[2], t_menu_env	*menu_env, t_map *map);
+void			ft_free_surface(t_sdl_data *sdl_data);
+void			ft_graceful_shutdown(t_sdl_data *sdl_data, t_map *map, Mix_Music *backgroundsound);
 void			*ft_save_ppm_pixels(void *surface);
 void			ft_draw_player(SDL_Surface *surface, int ox, int oy);
 void			ft_init_player_controller(t_player *player);
@@ -194,7 +223,7 @@ void			ft_draw_mini_map(SDL_Surface *surface, t_map *map, t_player *player);
 void			ft_draw_mini_map_wall_inter(t_ray_hit wall, SDL_Surface *bmp);
 t_map			*ft_create_map(char *file, t_player *player);
 void			ft_destroy_map(t_map *map);
-void			ft_ray_cast_scene(t_player *player, t_map *map, t_sdl_data *sdl_data);
+void			ft_handle_threads(t_player *player, t_map *map, t_sdl_data *sdl_data);
 int				ft_ray_cast(t_ray *ray, t_vec3 origin, t_vec3 direction, t_map *map);
 void			ft_find_closest_wall(t_ray *ray, t_map *map, t_vec3 forward);
 t_map			*ft_get_map_from_file(int fd, t_player *player);

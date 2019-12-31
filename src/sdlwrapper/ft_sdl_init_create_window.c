@@ -17,6 +17,7 @@ static SDL_Window *ft_sdl_init_create_window(int win_pos_x, int win_pos_y, int w
 void	ft_sdl_init_data(t_sdl_data *sdl_data)
 {
 	sdl_data->quit = false;
+	sdl_data->startgame = false;
 	sdl_data->bmp = NULL;
 	sdl_data->mini_map_bmp = NULL;
 	sdl_data->win = ft_sdl_init_create_window(500, 400, WIN_WIDTH, WIN_HEIGHT);
@@ -33,4 +34,6 @@ void	ft_sdl_init_data(t_sdl_data *sdl_data)
 		exit(EXIT_FAILURE);
 	}
 	sdl_data->display = SDL_GetWindowSurface(sdl_data->win);
+	sdl_data->menu[0] = SDL_LoadBMP("image.bmp");
+	sdl_data->menu[1] = SDL_LoadBMP("options.bmp");
 }

@@ -96,7 +96,7 @@ void	ft_destroy_map(t_map *map)
 	int i;
 
 	i = -1;
-	if (map != NULL)
+	if (map == NULL)
 		return ;
 	while (++i < map->height)
 	{
