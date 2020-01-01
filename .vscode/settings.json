@@ -15,6 +15,20 @@
         "algorithm": "c",
         "libgl.h": "c",
         "errno.h": "c",
-        "type_traits": "c"
+        "type_traits": "c",
+        "__functional_base": "c",
+        "atomic": "c",
+        "bitset": "c",
+        "chrono": "c",
+        "__memory": "c",
+        "functional": "c",
+        "limits": "c",
+        "memory": "c",
+        "ratio": "c",
+        "system_error": "c",
+        "tuple": "c",
+        "vector": "c",
+        "array": "c",
+        "utility": "c"
     }
 }

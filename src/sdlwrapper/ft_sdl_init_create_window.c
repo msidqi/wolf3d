@@ -1,21 +1,41 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_sdl_init_create_window.c                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: msidqi <marvin@42.fr>                      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/01/01 11:13:14 by msidqi            #+#    #+#             */
+/*   Updated: 2020/01/01 11:13:16 by msidqi           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "wolf3d.h"
 
-static SDL_Window *ft_sdl_init_create_window(int win_pos_x, int win_pos_y, int win_width, int win_height)
+static SDL_Window	*ft_sdl_init_create_window(
+	int win_pos_x, int win_pos_y, int win_width, int win_height)
 {
-    if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
-		fprintf(stderr, "SDL_Init Error: %s\n", SDL_GetError());
+	SDL_Window *win;
+
+	if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
+	{
+		perror(SDL_GetError());
 		exit(EXIT_FAILURE);
 	}
-	SDL_Window *win = SDL_CreateWindow("call of duty modern warfare", win_pos_x, win_pos_y, win_width, win_height, SDL_WINDOW_SHOWN);
-	if (win == NULL) {
-		fprintf(stderr, "SDL_CreateWindow Error: %s\n", SDL_GetError());
+	win = SDL_CreateWindow(
+		"wolf3d", win_pos_x, win_pos_y, win_width,
+											win_height, SDL_WINDOW_SHOWN);
+	if (win == NULL)
+	{
+		perror(SDL_GetError());
 		exit(EXIT_FAILURE);
 	}
-    return (win);
+	return (win);
 }
 
-void	ft_sdl_init_data(t_sdl_data *sdl_data)
+void				ft_sdl_init_data(t_sdl_data *sdl_data)
 {
+	sdl_data->fps = 0;
 	sdl_data->quit = false;
 	sdl_data->startgame = false;
 	sdl_data->bmp = NULL;

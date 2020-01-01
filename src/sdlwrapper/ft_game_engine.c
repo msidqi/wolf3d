@@ -3,49 +3,43 @@
 /*                                                        :::      ::::::::   */
 /*   ft_game_engine.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aabouibr <aabouibr@student.42.fr>          +#+  +:+       +#+        */
+/*   By: msidqi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/12/31 09:02:25 by aabouibr          #+#    #+#             */
-/*   Updated: 2019/12/31 10:09:03 by aabouibr         ###   ########.fr       */
+/*   Created: 2020/01/01 11:13:54 by msidqi            #+#    #+#             */
+/*   Updated: 2020/01/01 11:13:55 by msidqi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "wolf3d.h"
 
-static void ft_fill_background(SDL_Surface *bmp, t_player *player)
+static void	ft_fill_background(SDL_Surface *bmp, t_player *player)
 {
-	int x;
-	int y;
+	double	dot;
+	t_vec3	cross;
+	int		xy[2];
 
-	x = 0;
-	while (x < bmp->w)
+	xy[0] = -1;
+	while (++xy[0] < bmp->w)
 	{
-		double dot = ft_vec3_dot_product(player->forw, RIGHT);
-		t_vec3 cross = ft_vec3_cross_product(player->forw, RIGHT);
+		dot = ft_vec3_dot_product(player->forw, RIGHT);
+		cross = ft_vec3_cross_product(player->forw, RIGHT);
 		if (ft_vec3_dot_product(FORW, cross) <= 0)
 			dot = -dot;
-		y = bmp->h / 2 + player->height;
-		while (y >= 0)
-		{
-			put_pixel32(bmp, (x + (int)(((dot + 1) / 2) * bmp->w)) % bmp->w, y, get_sky_texture(x, y - player->height, bmp));
-			y--;
-		}
-		x++;
+		xy[1] = bmp->h / 2 + player->height + 1;
+		while (--xy[1] >= 0)
+			put_pixel32(bmp, (xy[0] + (int)(((dot + 1) / 2) * bmp->w)) %
+			bmp->w, xy[1], get_sky_texture(xy[0], xy[1] - player->height, bmp));
 	}
-	x = 0;
-	while (x < bmp->w)
+	xy[0] = -1;
+	while (++xy[0] < bmp->w)
 	{
-		y = bmp->h / 2 + player->height;
-		while (y < bmp->h)
-		{
-			 put_pixel32(bmp, x, y, 0xFF717171);
-			 y++;
-		}
-		x++;
+		xy[1] = bmp->h / 2 + player->height - 1;
+		while (++xy[1] < bmp->h)
+			put_pixel32(bmp, xy[0], xy[1], 0xFF717171);
 	}
 }
 
-static void ft_fps_counter(t_sdl_data *sdl_data)
+static void	ft_fps_counter(t_sdl_data *sdl_data)
 {
 	static int prev_tick = 0;
 	static int fps = 0;
@@ -61,10 +55,10 @@ static void ft_fps_counter(t_sdl_data *sdl_data)
 	}
 }
 
-void	ft_apply_physics(t_player *player, t_map *map)
+void		ft_apply_physics(t_player *player, t_map *map)
 {
 	static Uint64 previous_tick = 0;
-	
+
 	if (!previous_tick)
 		previous_tick = SDL_GetPerformanceCounter();
 	if (SDL_GetPerformanceCounter() - previous_tick > (Uint64)SECOND / 60)
@@ -74,7 +68,8 @@ void	ft_apply_physics(t_player *player, t_map *map)
 	}
 }
 
-void ft_apply_render(t_sdl_data *sdl_data, t_map *map, t_player *player, t_text_layer *tl)
+void		ft_apply_render(t_sdl_data *sdl_data, t_map *map,
+t_player *player, t_text_layer *tl)
 {
 	ft_clear_screen(sdl_data);
 	ft_fill_background(sdl_data->bmp, player);

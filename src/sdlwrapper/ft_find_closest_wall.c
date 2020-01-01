@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   ft_find_closest_wall.c                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aabouibr <aabouibr@student.42.fr>          +#+  +:+       +#+        */
+/*   By: msidqi <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/12/31 09:13:08 by aabouibr          #+#    #+#             */
-/*   Updated: 2019/12/31 09:17:32 by aabouibr         ###   ########.fr       */
+/*   Created: 2020/01/01 11:11:26 by msidqi            #+#    #+#             */
+/*   Updated: 2020/01/01 11:12:00 by msidqi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "wolf3d.h"
 
-static t_tile *get_map_tile_ver(t_index idx, t_map *m)
+static t_tile	*get_tile_v(t_vec2int idx, t_map *m)
 {
 	if (idx.x >= 0 && idx.y >= 0 && idx.y < m->height && idx.x < m->width)
 	{
@@ -24,7 +24,7 @@ static t_tile *get_map_tile_ver(t_index idx, t_map *m)
 	return (NULL);
 }
 
-static t_tile *get_map_tile_hor(t_index idx, t_map *m)
+static t_tile	*get_tile_h(t_vec2int idx, t_map *m)
 {
 	if (idx.x >= 0 && idx.y >= 0 && idx.y < m->height && idx.x < m->width)
 	{
@@ -36,7 +36,7 @@ static t_tile *get_map_tile_hor(t_index idx, t_map *m)
 	return (NULL);
 }
 
-void ft_pick_closest_intersection(t_ray *ray, t_inter hor, t_inter ver)
+void			ft_pick_closest_inter(t_ray *ray, t_inter hor, t_inter ver)
 {
 	if (hor.distance < ver.distance)
 	{
@@ -54,53 +54,39 @@ void ft_pick_closest_intersection(t_ray *ray, t_inter hor, t_inter ver)
 	}
 }
 
-
-double	ft_correct_distance(t_vec3 ray_dir, t_vec3 dir_forw, t_vec3 origin, t_vec3 inter_point)
+static void		ft_init_inter_data(t_tile **t, t_inter *hor_ver, t_map *map)
 {
-	double cos_alpha;
-
-	cos_alpha = ft_vec3_dot_product(dir_forw, ray_dir);
-	return (ft_vec3_mag(ft_vec3_sub(inter_point, origin)) * cos_alpha);
-}
-
-void ft_find_closest_wall(t_ray *ray, t_map *map, t_vec3 forward)
-{
-	t_tile *t[2];
-	t_vec3 i;
-	t_vec3 j;
-	t_inter	hor;
-	t_inter	ver;
-
 	t[0] = &map->tiles[0][0];
 	t[1] = &map->tiles[0][0];
-	i = ray->first_hor_point;
-	j = ray->first_ver_point;
-	hor = (t_inter){(t_vec3){0, 0, 0}, MEGA, false, SKYBOX};
-	ver = (t_inter){(t_vec3){0, 0, 0}, MEGA, false, SKYBOX};
-	while ((t[0] || t[1]) && (!hor.intersected || !ver.intersected))
+	hor_ver[0] = (t_inter){(t_vec3){0, 0, 0}, MEGA, false, SKYBOX};
+	hor_ver[1] = (t_inter){(t_vec3){0, 0, 0}, MEGA, false, SKYBOX};
+}
+
+void			ft_find_closest_wall(t_ray *ray, t_map *m, t_vec3 forw)
+{
+	t_tile	*t[2];
+	t_vec3	i_j_f[3];
+	t_inter	hr_vr[2];
+
+	i_j_f[0] = ray->first_hor_point;
+	i_j_f[1] = ray->first_ver_point;
+	i_j_f[2] = forw;
+	ray->ray_hit.distance_from_origin = MEGA;
+	ft_init_inter_data(t, hr_vr, m);
+	while ((t[0] || t[1]) && (!hr_vr[0].hashit || !hr_vr[1].hashit))
 	{
-		if (!hor.intersected && (t[0] = get_map_tile_hor(get_map_index(i, map), map)))
+		if (!hr_vr[0].hashit && (t[0] = get_tile_h(get_index(i_j_f[0], m), m)))
 		{
 			if (t[0]->depth == 1)
-			{
-				hor = (t_inter){i,
-					ft_correct_distance(ray->dir, forward, ray->origin, i), true,
-					((int)(i.y / TILE_HEIGHT) == t[0]->index.y) ? NORTH : SOUTH};
-				t[0] = NULL;
-			}
-			i = ft_vec3_add(i, ray->increments_h);
+				ft_store_h(&hr_vr[0], i_j_f, ray, &t[0]);
+			i_j_f[0] = ft_vec3_add(i_j_f[0], ray->increments_h);
 		}
-		if (!ver.intersected && (t[1] = get_map_tile_ver(get_map_index(j, map), map)))
+		if (!hr_vr[1].hashit && (t[1] = get_tile_v(get_index(i_j_f[1], m), m)))
 		{
 			if (t[1]->depth == 1)
-			{
-				ver = (t_inter){j,
-					ft_correct_distance(ray->dir, forward, ray->origin, j), true,
-					((int)(j.x / TILE_WIDTH) == t[1]->index.x) ? WEST : EAST};
-				t[1] = NULL;
-			}
-			j = ft_vec3_add(j, ray->increments_v);
+				ft_store_v(&hr_vr[1], i_j_f, ray, &t[1]);
+			i_j_f[1] = ft_vec3_add(i_j_f[1], ray->increments_v);
 		}
 	}
-	ft_pick_closest_intersection(ray, hor, ver);
+	ft_pick_closest_inter(ray, hr_vr[0], hr_vr[1]);
 }
