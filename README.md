@@ -1,6 +1,6 @@
 ### About: 
 This project is inspired by the world-famous 90’s game, which
-was the first FPS ever. It's about creating a 3d maze using ray-casting technique.  
+was the first FPS ever. It's about creating a 3d maze using **ray-casting** technique.  
 
 
 ### installation:  
@@ -12,6 +12,7 @@ Place your SDL2 libraries in<br>
 
 
 make && ./wolf3d<br>
-<br>
+  
+  
 <img src="https://github.com/msidqi/wolf3d/blob/release/pics/wolf3d.gif">
 <img src="https://github.com/msidqi/wolf3d/blob/release/pics/menu.jpg">
